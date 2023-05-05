@@ -6,7 +6,7 @@ plugins:
   # We only include our schema here. Without the explicit include, all plugins will be
   # loaded. Many build in plugins require more dependencies. Install nomad-lab[parsing]
   # to make all default plugins work.
-  include: 'schemas/baseclasses'
+  include: 'schemas/hysprint'
   options:
-    schemas/baseclasses:
-      python_package: baseclasses
+    schemas/hysprint:
+      python_package: hysprint
