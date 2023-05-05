@@ -115,7 +115,7 @@ class HySprint_ExperimentalPlan(ExperimentalPlan, EntryData):
                 and self.plan and self.standard_plan.processes):
             return
 
-        from nomad.datamodel.metainfo.eln.helper.execute_solar_sample_plan import execute_solar_sample_plan
+        from baseclasses.helper.execute_solar_sample_plan import execute_solar_sample_plan
         execute_solar_sample_plan(
             self, archive, HySprint_Sample, HySprint_Batch)
 
@@ -306,7 +306,7 @@ class HySprint_BasicBatch(Batch, EntryData):
         if self.number_of_samples > 0 and self.create_samples:
             self.create_samples = False
             samples = []
-            from nomad.datamodel.metainfo.eln.helper.execute_solar_sample_plan import create_archive, get_entry_id_from_file_name, get_reference
+            from baseclasses.helper.execute_solar_sample_plan import create_archive, get_entry_id_from_file_name, get_reference
             sample_name_id = self.batch_id.sample_short_name if self.batch_id is not None else None
             for sample_idx in range(self.number_of_samples):
                 hysprint_basicsample = HySprint_BasicSample(
