@@ -8,5 +8,5 @@ plugins:
   # to make all default plugins work.
   include: 'schemas/hysprint'
   options:
-    schemas/hysprint:
-      python_package: hysprint
+    schemas/hysprint_s:
+      python_package: hysprint_s
