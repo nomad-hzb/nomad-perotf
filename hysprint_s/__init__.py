@@ -73,7 +73,8 @@ from baseclasses.solar_energy import (
     UVvisMeasurement,
     EQEMeasurement,
     OpticalMicroscope,
-    SolcarCellSample, BasicSampleWithID
+    SolcarCellSample, BasicSampleWithID,
+    MPPTrackingHsprintCustom
 )
 
 from baseclasses.chemical_energy import (
@@ -1000,6 +1001,52 @@ class HySprint_108_HyVap_JVmeasurement(JVMeasurement, EntryData):
                     'xaxis': {
                         "fixedrange": False}},
             }])
+    
+    
+class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'author',
+                'end_time',
+                'location'],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "active_area",
+                    "intensity",
+                    "integration_time",
+                    "settling_time",
+                    "averaging",
+                    "compliance",
+                    "samples"])),
+        a_plot=[
+            {
+                "label": "Averages by Parameters",
+                'x': 'averages/:/time',
+                'y': 'averages/:/efficiency',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+            }, {
+                 "label": "Best Pixels",
+                 'x': 'best_pixels/:/time',
+                 'y': 'best_pixels/:/efficiency',
+                 'layout': {
+                     "showlegend": True,
+                     'yaxis': {
+                         "fixedrange": False},
+                     'xaxis': {
+                         "fixedrange": False}},
+             }]
+       )
+
 
 
 class IRIS_2038_HZBGloveBoxes_Pero4SOSIMStorage_JVmeasurement(
