@@ -343,7 +343,7 @@ class HySprint_114_SolventFumeHood_Cleaning(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -363,7 +363,7 @@ class IRIS_2031_Printerlab_SolutionCleaning(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -383,7 +383,7 @@ class IRIS_2135_Preparationlab_SolutionCleaning(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -403,7 +403,7 @@ class HySprint_114_HyFlowBox_Cleaning_UV(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -423,7 +423,7 @@ class IRIS_2031_Printerlab_Cleaning_UV(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -443,7 +443,7 @@ class HySprint_114_HyFlowBox_Cleaning_Plasma(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -463,7 +463,7 @@ class IRIS_2135_Preparationlab_Cleaning_Plasma(Cleaning, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -486,7 +486,7 @@ class HySprint_114_HTFumeHood_SprayPyrolysis(SprayPyrolysis, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -510,7 +510,7 @@ class HySprint_VaporizationAndDropCasting(
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -535,7 +535,7 @@ class IRIS_2038_HZBGloveBoxes_Pero3Inkjet_Inkjet_Printing(
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -564,7 +564,7 @@ class HySprint_114_HyFlowBox_SpinCoating(SpinCoating, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -588,7 +588,7 @@ class HySprint_108_HyPeroSpin_SpinCoating(SpinCoating, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -613,7 +613,7 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_SpinCoating(
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -638,7 +638,7 @@ class HySprint_108_HySpin_SpinCoating(SpinCoating, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -659,7 +659,7 @@ class HySprint_104_ProtoVap_SpinCoating(SpinCoating, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -684,7 +684,7 @@ class HySprint_108_HySDC_SlotDieCoating(SlotDieCoating, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -709,7 +709,7 @@ class HySprint_108_HyPeroSpin_ThermalAnnealing(ThermalAnnealing, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "temperature",
                     "time",
                     "function",
@@ -730,7 +730,7 @@ class HySprint_108_HySpin_ThermalAnnealing(ThermalAnnealing, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "temperature",
                     "time",
                     "function",
@@ -750,7 +750,7 @@ class HySprint_108_HyCDABox_ThermalAnnealing(ThermalAnnealing, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "temperature",
                     "time",
                     "function",
@@ -771,7 +771,7 @@ class HySprint_108_HySDC_ThermalAnnealing(ThermalAnnealing, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "temperature",
                     "time",
                     "function",
@@ -792,7 +792,7 @@ class HySprint_104_ProtoVap_ThermalAnnealing(ThermalAnnealing, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "temperature",
                     "time",
                     "function",
@@ -815,7 +815,7 @@ class IRIS_2038_HZBGloveBoxes_Pero5Evaporation_Evaporation(
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -835,7 +835,7 @@ class HySprint_108_HyVap_Evaporation(Evaporations, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -855,7 +855,7 @@ class HySprint_108_HyPeroVap_Evaporation(Evaporations, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -875,7 +875,7 @@ class HySprint_104_ProtoVap_Evaporation(Evaporations, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
@@ -896,7 +896,7 @@ class HySprint_108_HyDryAir_Storage(Storage, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "datetime", "previous_process",
                     "batch",
                     "samples"])))
@@ -1001,8 +1001,8 @@ class HySprint_108_HyVap_JVmeasurement(JVMeasurement, EntryData):
                     'xaxis': {
                         "fixedrange": False}},
             }])
-    
-    
+
+
 class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1035,18 +1035,17 @@ class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
                     'xaxis': {
                         "fixedrange": False}},
             }, {
-                 "label": "Best Pixels",
-                 'x': 'best_pixels/:/time',
-                 'y': 'best_pixels/:/efficiency',
-                 'layout': {
+                "label": "Best Pixels",
+                'x': 'best_pixels/:/time',
+                'y': 'best_pixels/:/efficiency',
+                'layout': {
                      "showlegend": True,
                      'yaxis': {
                          "fixedrange": False},
                      'xaxis': {
                          "fixedrange": False}},
-             }]
-       )
-
+            }]
+    )
 
 
 class IRIS_2038_HZBGloveBoxes_Pero4SOSIMStorage_JVmeasurement(
@@ -1274,7 +1273,7 @@ class HySprint_Process(ProcessOnSample, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "data_file",
                     "batch",
                     "samples"])))
@@ -1297,7 +1296,7 @@ class HySprint_Deposition(LayerDeposition, EntryData):
             properties=dict(
                 order=[
                     "name",
-                    "is_standard_process",
+                    "is_standard_process", "present",
                     "layer_type",
                     "layer_material_name",
                     "layer_material",
