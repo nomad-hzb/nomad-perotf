@@ -78,7 +78,8 @@ from baseclasses.solar_energy import (
 )
 
 from baseclasses.chemical_energy import (
-    Electrode, Electrolyte, ElectroChemicalCell
+    Electrode, Electrolyte, ElectroChemicalCell,
+    ElectroChemicalSetup, Environment
 )
 
 from baseclasses.chemical_energy import (
@@ -187,6 +188,38 @@ class Hysprint_ElectroChemicalCell(ElectroChemicalCell, EntryData):
                 "electrolyte"
             ])),
     )
+
+
+class HySprint_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
+    m_def = Section(
+        a_eln=dict(hide=['users', 'origin'],
+                   properties=dict(
+            order=[
+                "name",
+                "lab_id",
+                "chemical_composition_or_formulas",
+                "setup",
+                "reference_electrode",
+                "counter_electrode",
+            ])),
+    )
+
+
+class HySprint_Environment(Environment, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'users',
+                'origin'],
+            properties=dict(
+                editable=dict(
+                    exclude=["chemical_composition_or_formulas"]),
+                order=[
+                    "name",
+                    "lab_id",
+                    "chemical_composition_or_formulas",
+                    "ph_value",
+                    "solvent"])))
 
 
 class HySprint_Substrate(Substrate, EntryData):
@@ -904,69 +937,6 @@ class HySprint_108_HyDryAir_Storage(Storage, EntryData):
 
 # %%####################################### Measurements
 
-class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                "location",
-                "end_time",
-                "metadata_file"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
-        a_plot=[
-            {
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    "showlegend": True,
-                    'yaxis': {
-                        "fixedrange": False},
-                    'xaxis': {
-                        "fixedrange": False}},
-            }])
-
-
-class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                "location",
-                "end_time",
-                "metadata_file"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
-        a_plot=[
-            {
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current',
-                'layout': {
-                    "showlegend": True,
-                    'yaxis': {
-                        "fixedrange": False},
-                    'xaxis': {
-                        "fixedrange": False}},
-            }])
-
 
 class HySprint_108_HyVap_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
@@ -1222,42 +1192,6 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
                     "data_file",
                     "samples"])))
 
-
-class Wannsee_D8_XRD_Bruker(XRD, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                "location",
-                "end_time",
-                "metadata_file",
-                "shifted_data",
-                "identifier"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "samples"])),
-        a_plot=[
-            {
-                'x': [
-                    'measurements/:/angle',
-                    'shifted_data/:/angle'],
-                'y': [
-                    'measurements/:/intensity',
-                    'shifted_data/:/intensity'],
-                'layout': {
-                    'yaxis': {
-                        "fixedrange": False,
-                        "title": "Counts"},
-                    'xaxis': {
-                        "fixedrange": False}}},
-        ])
-
-    def normalize(self, archive, logger):
-        self.identifier = "HZB_WANNSEE"
-        super(Wannsee_D8_XRD_Bruker, self).normalize(archive, logger)
 
 # %%####################################### Generic Entries
 
