@@ -942,7 +942,7 @@ class HySprint_108_HyVap_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 'author',
                 'certified_values',
@@ -977,7 +977,7 @@ class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 'author',
                 'end_time',
@@ -1023,7 +1023,7 @@ class IRIS_2038_HZBGloveBoxes_Pero4SOSIMStorage_JVmeasurement(
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 'author',
                 'certified_values',
@@ -1070,7 +1070,7 @@ class HySprint_TimeResolvedPhotoluminescence(
                 order=[
                     "name",
                     "data_file",
-                    "samples"])),
+                    "samples", "solution"])),
         a_plot=[
             {
                 'x': 'trpl_properties/:/time',
@@ -1101,7 +1101,7 @@ class HySprint_OpticalMicroscope(
                 order=[
                     "name",
                     "data_file",
-                    "samples"])),
+                    "samples", "solution"])),
     )
 
 
@@ -1109,7 +1109,7 @@ class HySprint_108_HyVap_EQEmeasurement(EQEMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 'location',
                 'end_time'],
@@ -1143,7 +1143,7 @@ class HySprint_108_HyPrint_PLmeasurement(PLMeasurement, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples", "solution"])))
 
 
 class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_PLMeasurment(
@@ -1159,7 +1159,7 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_PLMeasurment(
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples", "solution"])))
 
 
 class HySprint_1xx_nobox_UVvismeasurement(UVvisMeasurement, EntryData):
@@ -1174,7 +1174,7 @@ class HySprint_1xx_nobox_UVvismeasurement(UVvisMeasurement, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples", "solution"])))
 
 
 class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
@@ -1190,7 +1190,7 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples", "solution"])))
 
 
 # %%####################################### Generic Entries
@@ -1258,7 +1258,7 @@ class HySprint_Measurement(MeasurementOnSample, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples", "solution"])))
 
     data_file = Quantity(
         type=str,
