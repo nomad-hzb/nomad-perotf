@@ -1262,6 +1262,5 @@ class HySprint_Measurement(MeasurementOnSample, EntryData):
 
     data_file = Quantity(
         type=str,
-        shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
