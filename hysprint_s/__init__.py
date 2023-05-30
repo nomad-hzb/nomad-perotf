@@ -29,6 +29,7 @@ from nomad.metainfo import (
 
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.results import Results, Properties, Material, ELN
+from nomad.datamodel.metainfo.eln import SampleID
 
 from baseclasses import (
     ProcessOnSample, MeasurementOnSample, LayerDeposition, Batch
@@ -38,9 +39,6 @@ from baseclasses.chemical import (
     Chemical
 )
 
-from baseclasses.characterizations import (
-    XRD
-)
 
 from baseclasses.solution import Solution, Ink
 from baseclasses.experimental_plan import ExperimentalPlan
@@ -81,9 +79,6 @@ from baseclasses.chemical_energy import (
     Electrode, Electrolyte, ElectroChemicalCell,
     ElectroChemicalSetup, Environment
 )
-
-from baseclasses.chemical_energy import (
-    CyclicVoltammetry)
 
 
 m_package0 = Package(name='HySprint')
@@ -189,6 +184,9 @@ class Hysprint_ElectroChemicalCell(ElectroChemicalCell, EntryData):
             ])),
     )
 
+    ecc_id = SubSection(
+        section_def=SampleID)
+
 
 class HySprint_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
@@ -203,6 +201,9 @@ class HySprint_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
                 "counter_electrode",
             ])),
     )
+
+    setup_id = SubSection(
+        section_def=SampleID)
 
 
 class HySprint_Environment(Environment, EntryData):
@@ -220,6 +221,9 @@ class HySprint_Environment(Environment, EntryData):
                     "chemical_composition_or_formulas",
                     "ph_value",
                     "solvent"])))
+
+    environment_id = SubSection(
+        section_def=SampleID)
 
 
 class HySprint_Substrate(Substrate, EntryData):
