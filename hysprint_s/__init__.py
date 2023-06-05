@@ -246,7 +246,6 @@ class HySprint_Solution(Solution, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
                 'users'],
             properties=dict(
                 order=[
@@ -266,7 +265,6 @@ class HySprint_Ink(Ink, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
                 'users',
                 'chemical_formula'],
             properties=dict(
