@@ -19,6 +19,8 @@
 import random
 import string
 import numpy as np
+import os
+from datetime import datetime
 
 # from nomad.units import ureg
 from nomad.metainfo import (
@@ -974,6 +976,23 @@ class HySprint_108_HyVap_JVmeasurement(JVMeasurement, EntryData):
                         "fixedrange": False}},
             }])
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            # todo detect file format
+            from baseclasses.helper.utilities import get_encoding
+            with archive.m_context.raw_file(self.data_file, "br") as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(self.data_file, encoding=encoding) as f:
+                from baseclasses.helper.file_parser.jv_parser import get_jv_data
+                from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+
+                jv_dict = get_jv_data(f.name, encoding)
+                get_jv_archive(jv_dict, self.data_file, self)
+
+        super(HySprint_108_HyVap_JVmeasurement,
+              self).normalize(archive, logger)
+
 
 class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
     m_def = Section(
@@ -1018,6 +1037,24 @@ class HySprint_104_ProtoVap_MPPTracking(MPPTrackingHsprintCustom, EntryData):
                          "fixedrange": False}},
             }]
     )
+
+    def normalize(self, archive, logger):
+        if self.data_file and self.load_data_from_file:
+            self.load_data_from_file = False
+            # from baseclasses.helper.utilities import get_encoding
+            # with archive.m_context.raw_file(self.data_file, "br") as f:
+            #     encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(self.data_file, encoding="ascii") as f:
+                if os.path.splitext(f.name)[-1] != ".csv":
+                    return
+                from baseclasses.helper.file_parser.load_mpp_hysprint import load_mpp_file
+                data = load_mpp_file(f.name)  # , encoding)
+
+            from baseclasses.helper.archive_builder.mpp_hysprint_archive import get_mpp_hysprint_samples
+            self.samples = get_mpp_hysprint_samples(self, data)
+        super(HySprint_104_ProtoVap_MPPTracking,
+              self).normalize(archive, logger)
 
 
 class IRIS_2038_HZBGloveBoxes_Pero4SOSIMStorage_JVmeasurement(
@@ -1085,6 +1122,30 @@ class HySprint_TimeResolvedPhotoluminescence(
                     'xaxis': {
                         "fixedrange": False}},
             }])
+
+    def normalize(self, archive, logger):
+        if self.data_file is not None:
+            # if self.trpl_properties is not None:
+            #     return
+            trpl_properties_list = []
+            for data_file in self.data_file:
+                # todo detect file format
+                if os.path.splitext(data_file)[-1] not in [".txt", ".dat"]:
+                    continue
+
+                from baseclasses.helper.utilities import get_encoding
+                with archive.m_context.raw_file(self.data_file, "br") as f:
+                    encoding = get_encoding(f)
+
+                with archive.m_context.raw_file(data_file, encoding=encoding) as f:
+                    from baseclasses.helper.file_parser.trpl_parser import get_trpl_measurement
+                    data = get_trpl_measurement(f)
+
+                from baseclasses.helper.archive_builder.trpl_archive import get_trpl_archive
+                trpl_properties_list.append(get_trpl_archive(data, data_file))
+            self.trpl_properties = trpl_properties_list
+        super(HySprint_TimeResolvedPhotoluminescence,
+              self).normalize(archive, logger)
 
 
 class HySprint_OpticalMicroscope(
@@ -1178,6 +1239,29 @@ class HySprint_1xx_nobox_UVvismeasurement(UVvisMeasurement, EntryData):
                     "data_file",
                     "samples", "solution"])))
 
+    def normalize(self, archive, logger):
+        import pandas as pd
+        measurements = []
+        for data_file in self.data_file:
+            if os.path.splitext(data_file)[-1] not in [".txt", ".csv"]:
+                continue
+            with archive.m_context.raw_file(data_file) as f:
+                if os.path.splitext(data_file)[-1] == ".txt":
+                    from baseclasses.helper.file_parser.uvvis_parser import get_uvvis_measurement_txt
+                    data, datetime_object = get_uvvis_measurement_txt(f)
+
+                if os.path.splitext(data_file)[-1] == ".csv":
+                    from baseclasses.helper.file_parser.uvvis_parser import get_uvvis_measurement_csv
+                    data, datetime_object = get_uvvis_measurement_csv(f)
+
+            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+            measurements.append(get_uvvis_archive(
+                data, datetime_object, data_file))
+        self.measurements = measurements
+
+        super(HySprint_1xx_nobox_UVvismeasurement,
+              self).normalize(archive, logger)
+
 
 class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
         UVvisMeasurement, EntryData):
@@ -1193,6 +1277,29 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
                     "name",
                     "data_file",
                     "samples", "solution"])))
+
+    def normalize(self, archive, logger):
+        import pandas as pd
+        measurements = []
+        for data_file in self.data_file:
+            if os.path.splitext(data_file)[-1] not in [".txt", ".csv"]:
+                continue
+            with archive.m_context.raw_file(data_file) as f:
+                if os.path.splitext(data_file)[-1] == ".txt":
+                    from baseclasses.helper.file_parser.uvvis_parser import get_uvvis_measurement_txt
+                    data, datetime_object = get_uvvis_measurement_txt(f)
+
+                if os.path.splitext(data_file)[-1] == ".csv":
+                    from baseclasses.helper.file_parser.uvvis_parser import get_uvvis_measurement_csv
+                    data, datetime_object = get_uvvis_measurement_csv(f)
+
+            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+            measurements.append(get_uvvis_archive(
+                data, datetime_object, data_file))
+        self.measurements = measurements
+
+        super(IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis,
+              self).normalize(archive, logger)
 
 
 # %%####################################### Generic Entries
