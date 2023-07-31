@@ -20,7 +20,6 @@ import random
 import string
 import numpy as np
 import os
-from datetime import datetime
 
 # from nomad.units import ureg
 from nomad.metainfo import (
@@ -49,9 +48,10 @@ from baseclasses.wet_chemical_deposition import (
     SpinCoating,
     SpinCoatingRecipe,
     SlotDieCoating,
-    InkjetPrinting,
+    LP50InkjetPrinting,
     VaporizationAndDropCasting,
-    SprayPyrolysis)
+    SprayPyrolysis,
+    WetChemicalDeposition)
 
 from baseclasses.vapour_based_deposition import (
     Evaporations)
@@ -61,7 +61,7 @@ from baseclasses.material_processes_misc import (
     SolutionCleaning,
     PlasmaCleaning,
     UVCleaning,
-    ThermalAnnealing,
+    # ThermalAnnealing,
     Storage)
 
 from baseclasses.solar_energy import (
@@ -524,12 +524,14 @@ class HySprint_114_HTFumeHood_SprayPyrolysis(SprayPyrolysis, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])))
+                    "samples",
+                    "solution",
+                    "layer",
+                    "properties",
+                    "quenching",
+                    "annealing"])))
 
 # %% ### Dropcasting
 
@@ -548,11 +550,14 @@ class HySprint_VaporizationAndDropCasting(
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
+                    "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "properties",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Non-functional layer",
         ))
@@ -561,7 +566,7 @@ class HySprint_VaporizationAndDropCasting(
 
 
 class IRIS_2038_HZBGloveBoxes_Pero3Inkjet_Inkjet_Printing(
-        InkjetPrinting, EntryData):
+        LP50InkjetPrinting, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -573,16 +578,17 @@ class IRIS_2038_HZBGloveBoxes_Pero3Inkjet_Inkjet_Printing(
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe_used",
-                    "print_head_used",
-                    "ink",
-                    "datetime",
-                    "previous_process",
+                    "recipe_used", "print_head_used",
+                    "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "properties",
+                    "print_head_path",
+                    "nozzle_voltage_profile",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer",
         ))
@@ -602,13 +608,14 @@ class HySprint_114_HyFlowBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe",
+                    "recipe"
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer",
         ))
@@ -626,13 +633,14 @@ class HySprint_108_HyPeroSpin_SpinCoating(SpinCoating, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe",
+                    "recipe"
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer",
         ))
@@ -651,13 +659,14 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_SpinCoating(
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe",
+                    "recipe"
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer",
         ))
@@ -676,13 +685,14 @@ class HySprint_108_HySpin_SpinCoating(SpinCoating, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe",
+                    "recipe"
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])))
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])))
 
 
 class HySprint_104_ProtoVap_SpinCoating(SpinCoating, EntryData):
@@ -697,13 +707,14 @@ class HySprint_104_ProtoVap_SpinCoating(SpinCoating, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "recipe",
+                    "recipe"
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer"))
 
@@ -722,120 +733,123 @@ class HySprint_108_HySDC_SlotDieCoating(SlotDieCoating, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])),
+                    "samples",
+                    "solution",
+                    "layer",
+                    "properties",
+                    "quenching",
+                    "annealing"
+                ])),
         a_template=dict(
             layer_type="Absorber Layer"))
 
 
-# %% ### Annealing
+# # %% ### Annealing
 
-class HySprint_108_HyPeroSpin_ThermalAnnealing(ThermalAnnealing, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                'location',
-                'end_time',
-                'humidity'],
-            properties=dict(
-                order=[
-                    "name",
-                    "is_standard_process", "present",
-                    "temperature",
-                    "time",
-                    "function",
-                    "datetime", "previous_process",
-                    "batch",
-                    "samples"])))
-
-
-class HySprint_108_HySpin_ThermalAnnealing(ThermalAnnealing, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                'location',
-                'end_time',
-                'humidity'],
-            properties=dict(
-                order=[
-                    "name",
-                    "is_standard_process", "present",
-                    "temperature",
-                    "time",
-                    "function",
-                    "datetime", "previous_process",
-                    "batch",
-                    "samples"])))
+# class HySprint_108_HyPeroSpin_ThermalAnnealing(ThermalAnnealing, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 'location',
+#                 'end_time',
+#                 'humidity'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "is_standard_process", "present",
+#                     "temperature",
+#                     "time",
+#                     "function",
+#                     "datetime", "previous_process",
+#                     "batch",
+#                     "samples"])))
 
 
-class HySprint_108_HyCDABox_ThermalAnnealing(ThermalAnnealing, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                'location',
-                'end_time'],
-            properties=dict(
-                order=[
-                    "name",
-                    "is_standard_process", "present",
-                    "temperature",
-                    "time",
-                    "function",
-                    "datetime", "previous_process",
-                    "batch",
-                    "samples"])))
+# class HySprint_108_HySpin_ThermalAnnealing(ThermalAnnealing, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 'location',
+#                 'end_time',
+#                 'humidity'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "is_standard_process", "present",
+#                     "temperature",
+#                     "time",
+#                     "function",
+#                     "datetime", "previous_process",
+#                     "batch",
+#                     "samples"])))
 
 
-class HySprint_108_HySDC_ThermalAnnealing(ThermalAnnealing, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                'location',
-                'end_time',
-                'humidity'],
-            properties=dict(
-                order=[
-                    "name",
-                    "is_standard_process", "present",
-                    "temperature",
-                    "time",
-                    "function",
-                    "datetime", "previous_process",
-                    "batch",
-                    "samples"])))
+# class HySprint_108_HyCDABox_ThermalAnnealing(ThermalAnnealing, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 'location',
+#                 'end_time'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "is_standard_process", "present",
+#                     "temperature",
+#                     "time",
+#                     "function",
+#                     "datetime", "previous_process",
+#                     "batch",
+#                     "samples"])))
 
 
-class HySprint_104_ProtoVap_ThermalAnnealing(ThermalAnnealing, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                'location',
-                'end_time',
-                'humidity'],
-            properties=dict(
-                order=[
-                    "name",
-                    "is_standard_process", "present",
-                    "temperature",
-                    "time",
-                    "function",
-                    "datetime", "previous_process",
-                    "batch",
-                    "samples"])))
+# class HySprint_108_HySDC_ThermalAnnealing(ThermalAnnealing, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 'location',
+#                 'end_time',
+#                 'humidity'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "is_standard_process", "present",
+#                     "temperature",
+#                     "time",
+#                     "function",
+#                     "datetime", "previous_process",
+#                     "batch",
+#                     "samples"])))
+
+
+# class HySprint_104_ProtoVap_ThermalAnnealing(ThermalAnnealing, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 'location',
+#                 'end_time',
+#                 'humidity'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "is_standard_process", "present",
+#                     "temperature",
+#                     "time",
+#                     "function",
+#                     "datetime", "previous_process",
+#                     "batch",
+#                     "samples"])))
 
 # %% ### Evaporation
 
@@ -1240,7 +1254,6 @@ class HySprint_1xx_nobox_UVvismeasurement(UVvisMeasurement, EntryData):
                     "samples", "solution"])))
 
     def normalize(self, archive, logger):
-        import pandas as pd
         measurements = []
         for data_file in self.data_file:
             if os.path.splitext(data_file)[-1] not in [".txt", ".csv"]:
@@ -1279,7 +1292,6 @@ class IRIS_2038_HZBGloveBoxes_Pero2Spincoater_UVvis(
                     "samples", "solution"])))
 
     def normalize(self, archive, logger):
-        import pandas as pd
         measurements = []
         for data_file in self.data_file:
             if os.path.splitext(data_file)[-1] not in [".txt", ".csv"]:
@@ -1328,6 +1340,33 @@ class HySprint_Process(ProcessOnSample, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
+class HySprint_WetChemicalDepoistion(WetChemicalDeposition, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time'],
+            properties=dict(
+                order=[
+                    "name",
+                    "is_standard_process", "present",
+                    "datetime", "previous_process",
+                    "batch",
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])))
+
+    data_file = Quantity(
+        type=str,
+        shape=['*'],
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'))
+
+
 class HySprint_Deposition(LayerDeposition, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1340,13 +1379,11 @@ class HySprint_Deposition(LayerDeposition, EntryData):
                 order=[
                     "name",
                     "is_standard_process", "present",
-                    "layer_type",
-                    "layer_material_name",
-                    "layer_material",
-                    "data_file",
                     "datetime", "previous_process",
                     "batch",
-                    "samples"])))
+                    "samples",
+                    "layer"
+                ])))
 
     data_file = Quantity(
         type=str,
