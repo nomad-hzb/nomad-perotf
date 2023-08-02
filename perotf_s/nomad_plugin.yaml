@@ -1,4 +1,4 @@
 plugin_type: schema
-name: Schemas for HZB Hysprint
+name: Schemas for KIT PeroTF
 description: |
-  These are the Nomad schemas  at HZB for Hysprint at HZB.
+  These are the Nomad schemas for PeroTF at KIT.
