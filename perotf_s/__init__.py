@@ -674,7 +674,7 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 encoding = get_encoding(f)
 
             with archive.m_context.raw_file(self.data_file, encoding=encoding) as f:
-                from baseclasses.helper.file_parser.jv_parser import get_jv_data
+                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
@@ -765,7 +765,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 encoding = get_encoding(f)
 
             with archive.m_context.raw_file(self.data_file, encoding=encoding) as f:
-                from baseclasses.helper.file_parser.jv_parser import get_jv_data
+                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
