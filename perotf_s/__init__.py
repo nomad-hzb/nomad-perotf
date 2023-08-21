@@ -1,8 +1,3 @@
-import random
-import string
-import numpy as np
-import os
-
 # from nomad.units import ureg
 from nomad.metainfo import (
     Package,
@@ -12,7 +7,6 @@ from nomad.metainfo import (
 
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.results import Results, Properties, Material, ELN
-from nomad.datamodel.metainfo.eln import SampleID
 
 from baseclasses import (
     ProcessOnSample, MeasurementOnSample, LayerDeposition, Batch
@@ -23,16 +17,13 @@ from baseclasses.chemical import (
 )
 
 
-from baseclasses.solution import Solution, Ink
+from baseclasses.solution import Solution
 from baseclasses.experimental_plan import ExperimentalPlan
 
 from baseclasses.wet_chemical_deposition import (
     SpinCoating,
     SpinCoatingRecipe,
     SlotDieCoating,
-    LP50InkjetPrinting,
-    VaporizationAndDropCasting,
-    SprayPyrolysis,
     WetChemicalDeposition)
 
 from baseclasses.vapour_based_deposition import (
@@ -42,36 +33,22 @@ from baseclasses.material_processes_misc import (
     Cleaning,
     SolutionCleaning,
     PlasmaCleaning,
-    UVCleaning,
-    # ThermalAnnealing,
-    Storage)
+)
 
 from baseclasses.solar_energy import (
     StandardSampleSolarCell,
     Substrate,
-    TimeResolvedPhotoluminescence,
+    # TimeResolvedPhotoluminescence,
     JVMeasurement,
-    PLMeasurement,
-    UVvisMeasurement,
+    # PLMeasurement,
+    # UVvisMeasurement,
     EQEMeasurement,
-    OpticalMicroscope,
-    SolcarCellSample, BasicSampleWithID,
+    # OpticalMicroscope,
+    SolcarCellSample,
     MPPTracking
 )
 
-from baseclasses.chemical_energy import (
-    Electrode, Electrolyte, ElectroChemicalCell,
-    ElectroChemicalSetup, Environment
-)
-# from nomad.units import ureg
-from nomad.metainfo import (
-    Package,
-    Quantity,
-    SubSection,
-    Section)
-
-
-m_package4 = Package(name='HySprint')
+m_package4 = Package(name='peroTF')
 
 # %% ####################### Entities
 
