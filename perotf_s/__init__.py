@@ -9,7 +9,7 @@ from nomad.datamodel.data import EntryData
 from nomad.datamodel.results import Results, Properties, Material, ELN
 
 from baseclasses import (
-    ProcessOnSample, MeasurementOnSample, LayerDeposition, Batch
+    BaseProcess, BaseMeasurement, LayerDeposition, Batch
 )
 
 from baseclasses.chemical import (
@@ -780,7 +780,7 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
 # %%####################################### Generic Entries
 
 
-class peroTF_Process(ProcessOnSample, EntryData):
+class peroTF_Process(BaseProcess, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -851,7 +851,7 @@ class peroTF_WetChemicalDepoistion(WetChemicalDeposition, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
-class peroTF_Measurement(MeasurementOnSample, EntryData):
+class peroTF_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
