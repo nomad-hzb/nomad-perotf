@@ -748,7 +748,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 jv_dict = get_jv_data(f.name, encoding)
                 get_jv_archive(jv_dict, self.data_file, self)
 
-        super(peroTF_CR_SolSimBox_JVmeasurement,
+        super(peroTF_TFL_GammaBox_JVmeasurement,
               self).normalize(archive, logger)
 
 
