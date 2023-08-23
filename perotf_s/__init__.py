@@ -154,7 +154,7 @@ class peroTF_Sample(SolcarCellSample, EntryData):
 
 class peroTF_Batch(Batch, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users'],
+        a_eln=dict(hide=['users', 'samples'],
                    properties=dict(
             order=[
                 "name",
@@ -170,7 +170,7 @@ class peroTF_CR_Wetbench_Cleaning(Cleaning, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -186,7 +186,7 @@ class peroTF_CR_Wetbench_Cleaning(Cleaning, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time']))
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments']))
 
 #     cleaning = SubSection(
 #         section_def=UVCleaning, repeats=True)
@@ -196,7 +196,7 @@ class peroTF_CR_Plasma_Cleaning(Cleaning, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time', 'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -224,7 +224,7 @@ class peroTF_CR_SpinBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time', 'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -245,7 +245,7 @@ class peroTF_CR_ChemistryBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -266,7 +266,7 @@ class peroTF_CR_MixBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -286,7 +286,7 @@ class peroTF_CR_OmegaBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -306,7 +306,7 @@ class peroTF_TFL_AlphaBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -326,7 +326,7 @@ class peroTF_CR_BetaBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -351,7 +351,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
             hide=[
                 'lab_id',
                 'users',
-                'location', 'end_time'],
+                'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name", "present",
@@ -373,7 +373,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -390,7 +390,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -407,7 +407,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -424,7 +424,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -441,7 +441,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -458,7 +458,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -475,7 +475,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -492,7 +492,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -509,7 +509,7 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time', 'humidity'],
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -529,7 +529,7 @@ class peroTF_TFL_SputterSystem_Sputtering(Sputtering, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -543,7 +543,7 @@ class peroTF_TFL_Ebeam_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -557,7 +557,7 @@ class peroTF_TFL_BellJar_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -571,7 +571,7 @@ class peroTF_UP_PEROvap_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -585,7 +585,7 @@ class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -602,7 +602,7 @@ class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time']))
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments']))
 
 
 # %%####################################### Measurements
@@ -615,7 +615,7 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 'lab_id',
                 'users',
                 'location',
-                'end_time',
+                'end_time',  'steps', 'instruments', 'results',
                 'certified_values',
                 'certification_institute'],
             properties=dict(
@@ -668,7 +668,7 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
                 'lab_id',
                 'users',
                 'location',
-                'end_time', ],
+                'end_time',  'steps', 'instruments', 'results', ],
             properties=dict(
                 order=[
                     "name",
@@ -706,7 +706,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 'lab_id',
                 'users',
                 'location',
-                'end_time',
+                'end_time',  'steps', 'instruments', 'results',
                 'certified_values',
                 'certification_institute'],
             properties=dict(
@@ -756,7 +756,7 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -768,14 +768,14 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time']))
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'results']))
 
 
 # class peroTF_1xx_nobox_UVvismeasurement(UVvisMeasurement, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'users', 'location', 'end_time']))
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'results']))
 
 # %%####################################### Generic Entries
 
@@ -804,7 +804,7 @@ class peroTF_Deposition(LayerDeposition, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -831,7 +831,7 @@ class peroTF_WetChemicalDepoistion(WetChemicalDeposition, EntryData):
                 'lab_id',
                 'users',
                 'location',
-                'end_time'],
+                'end_time',  'instruments'],
             properties=dict(
                 order=[
                     "name",
@@ -855,7 +855,7 @@ class peroTF_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', 'location', 'end_time'],
+                'lab_id', 'users', 'location', 'end_time',  'instruments'],
             properties=dict(
                 order=[
                     "name",
