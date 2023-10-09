@@ -75,7 +75,7 @@ class peroTF_ExperimentalPlan(ExperimentalPlan, EntryData):
         super(peroTF_ExperimentalPlan, self).normalize(archive, logger)
 
         from baseclasses.helper.execute_solar_sample_plan import execute_solar_sample_plan
-        execute_solar_sample_plan(self, archive, peroTF_Sample, peroTF_Batch)
+        execute_solar_sample_plan(self, archive, peroTF_Sample, peroTF_Batch, logger)
 
         # actual normalization!!
         archive.results = Results()
