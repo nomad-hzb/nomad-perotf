@@ -130,15 +130,17 @@ class peroTF_Substrate(Substrate, EntryData):
 
 class peroTF_Solution(Solution, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users', 'chemical_formula'],
-                   properties=dict(
-            order=[
-                "name",
-                "method",
-                "temperature",
-                "time",
-                "speed",
-                "solvent_ratio"])),
+        a_eln=dict(
+            hide=[
+                'users', 'components', 'elemental_composition',  "method", "temperature", "time", "speed", "solvent_ratio", "washing"],
+            properties=dict(
+                order=[
+                    "name",
+                    "datetime",
+                    "lab_id",
+                    "description", "preparation", "solute", "solvent", "other_solution", "additive", "storage"
+                ],
+            )),
         a_template=dict(temperature=45, time=15, method='Shaker'))
 
 
