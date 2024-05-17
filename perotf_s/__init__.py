@@ -553,7 +553,19 @@ class peroTF_TFL_Ebeam_Evaporation(Evaporations, EntryData):
                     "batch",
                     "samples", "layer"])))
 
-
+class peroTF_CR_Angstrom_Evaporation(Evaporations, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    "name",
+                    "present",
+                    "datetime", "previous_process",
+                    "batch",
+                    "samples", "layer"])))
+					
 class peroTF_TFL_BellJar_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -581,6 +593,18 @@ class peroTF_UP_PEROvap_Evaporation(Evaporations, EntryData):
                     "batch",
                     "samples", "layer"])))
 
+class peroTF_TFL_PEROvap_Evaporation(Evaporations, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    "name",
+                    "present",
+                    "datetime", "previous_process",
+                    "batch",
+                    "samples", "layer"])))
 
 class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
     m_def = Section(
