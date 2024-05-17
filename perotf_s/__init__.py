@@ -48,6 +48,9 @@ from baseclasses.solar_energy import (
     MPPTracking
 )
 
+from baseclasses.helper.utilities import convert_datetime
+
+
 m_package4 = Package(name='peroTF')
 
 # %% ####################### Entities
@@ -642,6 +645,15 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                         "fixedrange": False}},
             }])
 
+    multijunction_position = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(
+                suggestions=['top', 'mid', 'bottom'])
+        ))
+
     def normalize(self, archive, logger):
         super(JVMeasurement, self).normalize(archive, logger)
         self.method = "JV Measurement"
@@ -656,6 +668,7 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
+                self.datetime = convert_datetime(jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
                 get_jv_archive(jv_dict, self.data_file, self)
 
         super(peroTF_CR_SolSimBox_JVmeasurement,
@@ -733,6 +746,15 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                         "fixedrange": False}},
             }])
 
+    multijunction_position = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(
+                suggestions=['top', 'mid', 'bottom'])
+        ))
+
     def normalize(self, archive, logger):
         super(JVMeasurement, self).normalize(archive, logger)
         self.method = "JV Measurement"
@@ -747,6 +769,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
+                self.datetime = convert_datetime(jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
                 get_jv_archive(jv_dict, self.data_file, self)
 
         super(peroTF_TFL_GammaBox_JVmeasurement,
@@ -763,6 +786,15 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
                     "name",
                     "data_file",
                     "samples"])))
+
+    multijunction_position = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(
+                suggestions=['top', 'mid', 'bottom'])
+        ))
 
 
 # class peroTF_108_HyPrint_PLmeasurement(PLMeasurement, EntryData):
