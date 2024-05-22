@@ -556,6 +556,7 @@ class peroTF_TFL_Ebeam_Evaporation(Evaporations, EntryData):
                     "batch",
                     "samples", "layer"])))
 
+
 class peroTF_CR_Angstrom_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -568,7 +569,8 @@ class peroTF_CR_Angstrom_Evaporation(Evaporations, EntryData):
                     "datetime", "previous_process",
                     "batch",
                     "samples", "layer"])))
-					
+
+
 class peroTF_TFL_BellJar_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -596,6 +598,7 @@ class peroTF_UP_PEROvap_Evaporation(Evaporations, EntryData):
                     "batch",
                     "samples", "layer"])))
 
+
 class peroTF_TFL_PEROvap_Evaporation(Evaporations, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -608,6 +611,7 @@ class peroTF_TFL_PEROvap_Evaporation(Evaporations, EntryData):
                     "datetime", "previous_process",
                     "batch",
                     "samples", "layer"])))
+
 
 class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
     m_def = Section(
@@ -692,7 +696,12 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
-                self.datetime = convert_datetime(jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
+                try:
+                    self.datetime = convert_datetime(
+                        jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
+                except:
+                    logger.warning("Couldnt parse datetime")
+
                 get_jv_archive(jv_dict, self.data_file, self)
 
         super(peroTF_CR_SolSimBox_JVmeasurement,
@@ -793,7 +802,11 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
                 jv_dict = get_jv_data(f.name, encoding)
-                self.datetime = convert_datetime(jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
+                try:
+                    self.datetime = convert_datetime(
+                        jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S %p", utc=False)
+                except:
+                    logger.warning("Couldnt parse datetime")
                 get_jv_archive(jv_dict, self.data_file, self)
 
         super(peroTF_TFL_GammaBox_JVmeasurement,
