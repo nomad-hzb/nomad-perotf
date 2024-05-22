@@ -699,6 +699,9 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 try:
                     self.datetime = convert_datetime(
                         jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
+                    if not self.datetime:
+                        self.datetime = convert_datetime(
+                            jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S %p", utc=False)
                 except:
                     logger.warning("Couldnt parse datetime")
 
@@ -805,6 +808,9 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 try:
                     self.datetime = convert_datetime(
                         jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S %p", utc=False)
+                    if not self.datetime:
+                        self.datetime = convert_datetime(
+                            jv_dict["datetime"], datetime_format="%Y-%m-%d %H:%M:%S", utc=False)
                 except:
                     logger.warning("Couldnt parse datetime")
                 get_jv_archive(jv_dict, self.data_file, self)
