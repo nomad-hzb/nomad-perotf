@@ -4,7 +4,7 @@ We will discuss the logic behind accessing the parameters of a solution in a wet
 The idea is that we create a path to uniquely identify a parameter based on the names in nomad.
 
 Every solution parameter will start with accessing the solution:  
-`solution/` which references the solution section. In theory there could be multiple solutions be used, to access the first we need to write `/0/`. To access the second '/1/', and so on...
+`solution/` which references the solution section. In theory there could be multiple solutions be used, to access the first we need to write `/0/`. To access the second `/1/`, and so on...
 
 The first parameter is the solution_volume:  
 `solution/0/solution_volume`
