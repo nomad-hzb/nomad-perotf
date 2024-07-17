@@ -222,7 +222,7 @@ class peroTF_CR_Plasma_Cleaning(Cleaning, EntryData):
 #                 'lab_id', 'layer', 'user', 'author']))
 
 
-class HySprint_BladeCoating(BladeCoating, EntryData):
+class peroTF_BladeCoating(BladeCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
