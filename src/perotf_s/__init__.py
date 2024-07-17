@@ -45,7 +45,7 @@ from baseclasses.solar_energy import (
     EQEMeasurement,
     # OpticalMicroscope,
     SolcarCellSample,
-    MPPTracking
+    MPPTracking, PLImaging
 )
 
 from baseclasses.helper.utilities import convert_datetime
@@ -852,6 +852,20 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
 #         a_eln=dict(
 #             hide=[
 #                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'results']))
+
+class peroTF_PLImaging(PLImaging, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time', 'steps', 'instruments', 'results', "solution"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "samples"])))
 
 # %%####################################### Generic Entries
 
