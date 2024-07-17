@@ -23,7 +23,7 @@ from baseclasses.experimental_plan import ExperimentalPlan
 from baseclasses.wet_chemical_deposition import (
     SpinCoating,
     SpinCoatingRecipe,
-    SlotDieCoating,
+    SlotDieCoating, BladeCoating,
     WetChemicalDeposition)
 
 from baseclasses.vapour_based_deposition import (
@@ -222,7 +222,27 @@ class peroTF_CR_Plasma_Cleaning(Cleaning, EntryData):
 #                 'lab_id', 'layer', 'user', 'author']))
 
 
+class HySprint_BladeCoating(BladeCoating, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'end_time', 'steps', 'instruments', 'results'],
+            properties=dict(
+                order=[
+                    "name", "location",
+                    "present",
+                    "datetime",
+                    "batch",
+                    "samples",
+                    "solution",
+                    "layer",
+                    "quenching",
+                    "annealing"])))
+
 # %% ### Spin Coating
+
 
 class peroTF_CR_SpinBox_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
