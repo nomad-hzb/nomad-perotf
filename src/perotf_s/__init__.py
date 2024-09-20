@@ -33,6 +33,7 @@ from baseclasses.material_processes_misc import (
     Cleaning,
     SolutionCleaning,
     PlasmaCleaning,
+    Annealing,
 )
 
 from baseclasses.solar_energy import (
@@ -389,6 +390,47 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
                     "annealing"])),
         a_template=dict(
             layer_type="Absorber Layer"))
+
+# # %% ### Annealing
+
+class peroTF_CR_ThermalAnnealing(Annealing, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
+            properties=dict(
+                order=[
+                    "name","present",
+					"datetime", 
+                    "temperature",
+                    "time",
+					"atmosphere",
+                    "function",
+                    "previous_process",
+                    "batch",
+                    "samples"])), 
+					a_template=dict(
+            layer_type="Absorber Layer",))
+
+
+class peroTF_TFL_ThermalAnnealing(Annealing, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
+            properties=dict(
+                order=[
+                    "name","present",
+					"datetime", 
+                    "temperature",
+                    "time",
+					"atmosphere",
+                    "function",
+                    "previous_process",
+                    "batch",
+                    "samples"])), 
+					a_template=dict(
+            layer_type="Absorber Layer",))
 
 
 # # %% ### Annealing
