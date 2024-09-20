@@ -393,7 +393,11 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 
 # # %% ### Annealing
 
-class peroTF_CR_ThermalAnnealing(Annealing, EntryData):
+class peroTF_CR_ThermalAnnealing(BaseProcess, EntryData):
+    annealing = SubSection(
+        links=['http://purl.obolibrary.org/obo/RO_0001019'],
+        section_def=Annealing)
+	
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -413,7 +417,11 @@ class peroTF_CR_ThermalAnnealing(Annealing, EntryData):
             layer_type="Absorber Layer",))
 
 
-class peroTF_TFL_ThermalAnnealing(Annealing, EntryData):
+class peroTF_TFL_ThermalAnnealing(BaseProcess, EntryData):
+    annealing = SubSection(
+        links=['http://purl.obolibrary.org/obo/RO_0001019'],
+        section_def=Annealing)
+	
     m_def = Section(
         a_eln=dict(
             hide=[
