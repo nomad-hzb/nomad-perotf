@@ -399,27 +399,28 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 
 # # %% ### Annealing
 
+
 class peroTF_CR_ThermalAnnealing(BaseProcess, EntryData):
     annealing = SubSection(
         links=['http://purl.obolibrary.org/obo/RO_0001019'],
         section_def=Annealing)
-	
+
     m_def = Section(
         a_eln=dict(
             hide=[
                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
             properties=dict(
                 order=[
-                    "name","present",
-					"datetime", 
+                    "name", "present",
+                    "datetime",
                     "temperature",
                     "time",
-					"atmosphere",
+                    "atmosphere",
                     "function",
                     "previous_process",
                     "batch",
-                    "samples"])), 
-					a_template=dict(
+                    "samples"])),
+        a_template=dict(
             layer_type="Absorber Layer",))
 
 
@@ -427,23 +428,23 @@ class peroTF_TFL_ThermalAnnealing(BaseProcess, EntryData):
     annealing = SubSection(
         links=['http://purl.obolibrary.org/obo/RO_0001019'],
         section_def=Annealing)
-	
+
     m_def = Section(
         a_eln=dict(
             hide=[
                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments', 'humidity'],
             properties=dict(
                 order=[
-                    "name","present",
-					"datetime", 
+                    "name", "present",
+                    "datetime",
                     "temperature",
                     "time",
-					"atmosphere",
+                    "atmosphere",
                     "function",
                     "previous_process",
                     "batch",
-                    "samples"])), 
-					a_template=dict(
+                    "samples"])),
+        a_template=dict(
             layer_type="Absorber Layer",))
 
 
@@ -943,6 +944,40 @@ class peroTF_PLImaging(PLImaging, EntryData):
                     "data_file",
                     "samples"])))
 
+
+class KIT_XRD_XY_Simulated(XRD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
+                "metadata_file",
+                "shifted_data",
+                "identifier"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "samples", "solution"])),
+        a_plot=[
+            {
+                'x': [
+                    'data/angle'],
+                'y': [
+                    'data/intensity'],
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False,
+                        "title": "Counts"},
+                    'xaxis': {
+                        "fixedrange": False}}},
+        ])
+
+    cif_string = Quantity(
+        type=str)
+
 # %%####################################### Generic Entries
 
 
@@ -1015,37 +1050,6 @@ class peroTF_WetChemicalDepoistion(WetChemicalDeposition, EntryData):
         shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
-
-
-class KIT_XRD_XY(XRD, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                "location",
-                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
-                "metadata_file",
-                "shifted_data",
-                "identifier"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "samples", "solution"])),
-        a_plot=[
-            {
-                'x': [
-                    'data/angle'],
-                'y': [
-                    'data/intensity'],
-                'layout': {
-                    'yaxis': {
-                        "fixedrange": False,
-                        "title": "Counts"},
-                    'xaxis': {
-                        "fixedrange": False}}},
-        ])
 
 
 class peroTF_Measurement(BaseMeasurement, EntryData):
