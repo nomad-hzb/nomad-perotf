@@ -35,6 +35,12 @@ from baseclasses.material_processes_misc import (
     PlasmaCleaning,
 )
 
+
+from baseclasses.characterizations import (
+    XRD, XRDData
+)
+
+
 from baseclasses.solar_energy import (
     StandardSampleSolarCell, SolarCellProperties,
     Substrate,
@@ -959,6 +965,37 @@ class peroTF_WetChemicalDepoistion(WetChemicalDeposition, EntryData):
         shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
+
+
+class KIT_XRD_XY(XRD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
+                "metadata_file",
+                "shifted_data",
+                "identifier"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "samples", "solution"])),
+        a_plot=[
+            {
+                'x': [
+                    'data/angle'],
+                'y': [
+                    'data/intensity'],
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False,
+                        "title": "Counts"},
+                    'xaxis': {
+                        "fixedrange": False}}},
+        ])
 
 
 class peroTF_Measurement(BaseMeasurement, EntryData):
