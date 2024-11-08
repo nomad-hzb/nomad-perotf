@@ -1,4 +1,0 @@
-plugin_type: schema
-name: Schemas for KIT PeroTF
-description: |
-  These are the Nomad schemas for PeroTF at KIT.

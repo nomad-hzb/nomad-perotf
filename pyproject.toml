@@ -7,17 +7,16 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
 ]
 name = "nomad-perotf"
-description = "A schema package plugin for chemical energy at hzb."
+description = "A schema package plugin for perotf at KIT."
 version = "1.0.0"
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Michael Götte", email = "michael.goette@helmholtz-berlin.de" },
     { name = "Felix Laufer", email = "felix.laufer@kit.edu" },
@@ -28,12 +27,21 @@ maintainers = [
     { name = "Michael Götte", email = "michael.goette@helmholtz-berlin.de" },
 ]
 license = { file = "LICENSE" }
-#dependencies = ["nomad-lab>=1.2.2dev578"]
+dependencies = [
+    "nomad-lab>=1.3.10",
+    'nomad-baseclasses @ git+https://github.com/nomad-hzb/nomad-baseclasses.git',
+    'nomad-measurements']
+
 [project.urls]
 Repository = "https://github.com/nomad-hzb/nomad-perotf"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest", "structlog"]
+
+[tool.uv]
+extra-index-url = [
+  "https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -80,9 +88,13 @@ select = [
     "PL",
 ]
 
+pylint.max-branches = 20
+pylint.max-statements = 65
+
 ignore = [
     "F403", # 'from module import *' used; unable to detect undefined names
-]
+    "PLR2004",
+] 
 
 fixable = ["ALL"]
 
@@ -94,7 +106,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # use single quotes for strings.
 quote-style = "single"
 
-# indent with spaces, rather than tabs.
+# indent with spaces, rather than bs.
 indent-style = "space"
 
 # Like Black, respect magic trailing commas.
@@ -110,3 +122,6 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [project.entry-points.'nomad.plugin']
+perotf_package = "nomad_perotf.schema_packages:perotf_package"
+perotf_parser = "nomad_perotf.parsers:perotf_parser"
+# perotf_experiment_parser = "nomad_perotf.parsers:perotf_experiment_parser"
