@@ -8,13 +8,13 @@ class PeroTFParserEntryPoint(ParserEntryPoint):
         return PeroTFParser(**self.dict())
 
 
-# class HySprintExperimentParserEntryPoint(ParserEntryPoint):
-#     def load(self):
-#         from nomad_hysprint.parsers.hysprint_batch_parser import (
-#             HySprintExperimentParser,
-#         )
+class PeroTFExperimentParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_perotf.parsers.perotf_batch_parser import (
+            PeroTFExperimentParser,
+        )
 
-#         return HySprintExperimentParser(**self.dict())
+        return PeroTFExperimentParser(**self.dict())
 
 
 perotf_parser = PeroTFParserEntryPoint(
@@ -26,10 +26,10 @@ perotf_parser = PeroTFParserEntryPoint(
 )
 
 
-# hysprint_experiment_parser = HySprintExperimentParserEntryPoint(
-#     name='HySprintBatchParser',
-#     description='Parser for Hysprint Batch xlsx files',
-#     mainfile_name_re='^(.+\.xlsx)$',
-#     # mainfile_contents_re='Experiment Info',
-#     mainfile_mime_re='(application|text|image)/.*',
-# )
+perotf_experiment_parser = PeroTFExperimentParserEntryPoint(
+    name='PeroTFExperimentParser',
+    description='Parser for perotf Batch xlsx files',
+    mainfile_name_re='^(.+\.xlsx)$',
+    # mainfile_contents_re='Experiment Info',
+    mainfile_mime_re='(application|text|image)/.*',
+)

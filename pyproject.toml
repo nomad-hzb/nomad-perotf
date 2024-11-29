@@ -124,4 +124,4 @@ where = ["src"]
 [project.entry-points.'nomad.plugin']
 perotf_package = "nomad_perotf.schema_packages:perotf_package"
 perotf_parser = "nomad_perotf.parsers:perotf_parser"
-# perotf_experiment_parser = "nomad_perotf.parsers:perotf_experiment_parser"
+perotf_experiment_parser = "nomad_perotf.parsers:perotf_experiment_parser"
