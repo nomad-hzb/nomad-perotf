@@ -27,15 +27,27 @@ import pandas as pd
 from baseclasses import LayerProperties, PubChemPureSubstanceSectionCustom
 from baseclasses.helper.utilities import create_archive
 from baseclasses.material_processes_misc import (
+    AirKnifeGasQuenching,
     Annealing,
     AntiSolventQuenching,
+    PlasmaCleaning,
+    SolutionCleaning,
+    UVCleaning,
 )
 from baseclasses.solution import Solution, SolutionChemical
+from baseclasses.vapour_based_deposition.atomic_layer_deposition import (
+    ALDMaterial,
+    ALDPropertiesIris,
+)
 from baseclasses.vapour_based_deposition.evaporation import (
     InorganicEvaporation,
     OrganicEvaporation,
 )
+from baseclasses.vapour_based_deposition.sputtering import SputteringProcess
 from baseclasses.wet_chemical_deposition import PrecursorSolution
+from baseclasses.wet_chemical_deposition.slot_die_coating import (
+    SlotDieCoatingProperties,
+)
 from baseclasses.wet_chemical_deposition.spin_coating import SpinCoatingRecipeSteps
 from nomad.datamodel import EntryArchive
 from nomad.datamodel.data import (
@@ -51,12 +63,15 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_perotf.schema_packages.perotf_package import (
+    peroTF_ALD,
     peroTF_Batch,
-    peroTF_CR_Angstrom_Evaporation,
-    peroTF_CR_BetaBox_SpinCoating,
-    peroTF_CR_Wetbench_Cleaning,
+    peroTF_Cleaning,
+    peroTF_Evaporation,
     peroTF_Process,
     peroTF_Sample,
+    peroTF_SlotDieCoating,
+    peroTF_SpinCoating,
+    peroTF_Sputtering,
     peroTF_Substrate,
 )
 
@@ -170,8 +185,9 @@ def map_solutions(data):
 
 
 def map_spin_coating(i, j, lab_ids, data, upload_id):
-    archive = peroTF_CR_BetaBox_SpinCoating(
+    archive = peroTF_SpinCoating(
         name='spin coating ' + get_value(data, 'Material name', '', False),
+        location=get_value(data, 'Tool/GB name', '', False),
         positon_in_experimental_plan=i,
         description=get_value(data, 'Notes', '', False),
         samples=[
@@ -196,84 +212,111 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
                 ),
             )
         ],
-        quenching=AntiSolventQuenching(
+        annealing=Annealing(
+            temperature=get_value(data, 'Annealing temperature [°C]', None),
+            time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
+            atmosphere=get_value(data, 'Annealing athmosphere', None, False),
+        ),
+        recipe_steps=[
+            SpinCoatingRecipeSteps(
+                speed=get_value(data, f'Rotation speed {step}[rpm]', None),
+                time=get_value(data, f'Rotation time {step}[s]', None),
+                acceleration=get_value(data, f'Acceleration {step}[rpm/s]', None),
+            )
+            for step in ['', '1 ', '2 ', '3 ', '4 ']
+            if get_value(data, f'Rotation time {step}[s]')
+        ],
+    )
+    if get_value(data, 'Anti solvent volume [ml]', None):
+        archive.quenching = AntiSolventQuenching(
             anti_solvent_volume=get_value(data, 'Anti solvent volume [ml]', None),
             anti_solvent_dropping_time=get_value(
                 data, 'Anti solvent dropping time [s]', None
             ),
+            anti_solvent_dropping_height=get_value(
+                data, 'Anti solvent dropping heigt [mm]', None
+            ),
+            anti_solvent_dropping_flow_rate=get_value(
+                data, 'Anti solvent dropping speed [ul/s]', None
+            ),
             anti_solvent_2=PubChemPureSubstanceSectionCustom(
                 name=get_value(data, 'Anti solvent name', None, False), load_data=False
             ),
-        ),
-        annealing=Annealing(
-            temperature=get_value(data, 'Annealing temperature [°C]', None),
-            time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
-        ),
-        recipe_steps=[
-            SpinCoatingRecipeSteps(
-                speed=get_value(data, 'Rotation speed [rpm]', None),
-                time=get_value(data, 'Rotation time [s]', None),
-            )
-        ],
-    )
+        )
+    if get_value(data, 'Gas quenching start time [s]', None):
+        archive.quenchingGasQuenchingWithNozzle(
+            starting_delay=get_value(data, 'Gas quenching start time [s]', None),
+            flow_rate=get_value(data, 'Gas quenching flow rate [ml/s]', None),
+            height=get_value(data, 'Gas quenching height [mm]', None),
+            duration=get_value(data, 'Gas quenching duration [s]', None),
+            pressure=get_value(data, 'Gas quenching pressure [bar]', None),
+            velocity=get_value(data, 'Gas quenching velocity [m/s]', None),
+            nozzle_shape=get_value(data, 'Nozzle shape', None, False),
+            nozzle_size=get_value(data, 'Nozzle size [mm²]', None, False),
+            gas=PubChemPureSubstanceSectionCustom(
+                name=get_value(data, 'Gas', None, False), load_data=False
+            ),
+        )
+
     material = get_value(data, 'Material name', '', False)
     return (f'{i}_{j}_spin_coating_{material}', archive)
 
 
-# def map_sdc(i, j, lab_ids, data, upload_id):
-#     archive = HySprint_SlotDieCoating(
-#         name='slot die coating ' + get_value(data, 'Material name', '', False),
-#         positon_in_experimental_plan=i,
-#         description=get_value(data, 'Notes', None, False),
-#         samples=[
-#             CompositeSystemReference(
-#                 reference=get_reference(upload_id, f'{lab_id}.archive.json'),
-#                 lab_id=lab_id,
-#             )
-#             for lab_id in lab_ids
-#         ],
-#         solution=[
-#             PrecursorSolution(
-#                 solution_details=map_solutions(data),  # check unit
-#                 # check unit
-#                 solution_volume=convert_quantity(
-#                     get_value(data, 'Solution volume [um]', None), 1 / 1000
-#                 ),
-#             )
-#         ],
-#         layer=[
-#             LayerProperties(
-#                 layer_type=get_value(data, 'Layer type', None, False),
-#                 layer_material_name=get_value(data, 'Material name', None, False),
-#             )
-#         ],
-#         annealing=Annealing(
-#             temperature=get_value(data, 'Annealing temperature [°C]', None),
-#             time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
-#         ),
-#         properties=SlotDieCoatingProperties(
-#             flow_rate=convert_quantity(data.get('Flow rate [ul/min]',
-#                       None), 1 / 1000),
-#             slot_die_head_distance_to_thinfilm=get_value(data, 'Head gap [mm]'),
-#             slot_die_head_speed=get_value(data, 'Speed [mm/s]'),
-#         ),
-#         quenching=AirKnifeGasQuenching(
-#             air_knife_angle=get_value(data, 'Air knife angle [°]', None),
-#             bead_volume=get_value(data, 'Bead volume [mm/s]', None),
-#             drying_speed=get_value(data, 'Drying speed [cm/min]', None),
-#             air_knife_distance_to_thin_film=convert_quantity(
-#                 data.get('Air knife gap [cm]', None), 10000
-#             ),
-#         ),
-#     )
-#     material = get_value(data, 'Material name', '', False)
-#     return (f'{i}_{j}_slot_die_coating_{material}', archive)
+def map_sdc(i, j, lab_ids, data, upload_id):
+    archive = peroTF_SlotDieCoating(
+        name='slot die coating ' + get_value(data, 'Material name', '', False),
+        location=get_value(data, 'Tool/GB name', '', False),
+        positon_in_experimental_plan=i,
+        description=get_value(data, 'Notes', None, False),
+        samples=[
+            CompositeSystemReference(
+                reference=get_reference(upload_id, f'{lab_id}.archive.json'),
+                lab_id=lab_id,
+            )
+            for lab_id in lab_ids
+        ],
+        solution=[
+            PrecursorSolution(
+                solution_details=map_solutions(data),  # check unit
+                # check unit
+                solution_volume=convert_quantity(
+                    get_value(data, 'Solution volume [um]', None), 1 / 1000
+                ),
+            )
+        ],
+        layer=[
+            LayerProperties(
+                layer_type=get_value(data, 'Layer type', None, False),
+                layer_material_name=get_value(data, 'Material name', None, False),
+            )
+        ],
+        annealing=Annealing(
+            temperature=get_value(data, 'Annealing temperature [°C]', None),
+            time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
+        ),
+        properties=SlotDieCoatingProperties(
+            flow_rate=convert_quantity(data.get('Flow rate [ul/min]', None), 1 / 1000),
+            slot_die_head_distance_to_thinfilm=get_value(data, 'Head gap [mm]'),
+            slot_die_head_speed=get_value(data, 'Speed [mm/s]'),
+        ),
+        quenching=AirKnifeGasQuenching(
+            air_knife_angle=get_value(data, 'Air knife angle [°]', None),
+            bead_volume=get_value(data, 'Bead volume [mm/s]', None),
+            drying_speed=get_value(data, 'Drying speed [cm/min]', None),
+            air_knife_distance_to_thin_film=convert_quantity(
+                data.get('Air knife gap [cm]', None), 10000
+            ),
+        ),
+    )
+    material = get_value(data, 'Material name', '', False)
+    return (f'{i}_{j}_slot_die_coating_{material}', archive)
 
 
 def map_cleaning(i, j, lab_ids, data, upload_id):
-    archive = peroTF_CR_Wetbench_Cleaning(
+    archive = peroTF_Cleaning(
         name='Cleaning',
         positon_in_experimental_plan=i,
+        location=get_value(data, 'Tool/GB name', '', False),
         description=get_value(data, 'Notes', '', False),
         samples=[
             CompositeSystemReference(
@@ -281,6 +324,25 @@ def map_cleaning(i, j, lab_ids, data, upload_id):
                 lab_id=lab_id,
             )
             for lab_id in lab_ids
+        ],
+        cleaning=[
+            SolutionCleaning(
+                time=get_value(data, f'Time {i} [s]', None),
+                temperature=get_value(data, f'Temperature {i} [°C]', None),
+                solvent_2=PubChemPureSubstanceSectionCustom(
+                    name=get_value(data, f'Solvent {i}', None, False), load_data=False
+                ),
+            )
+            for i in range(10)
+            if get_value(data, f'Solvent {i}', None, False)
+        ],
+        cleaning_uv=[UVCleaning(time=get_value(data, 'UV-Ozone Time [s]', None))],
+        cleaning_plasma=[
+            PlasmaCleaning(
+                time=get_value(data, 'Gas-Plasma Time [s]', None),
+                power=get_value(data, 'Gas-Plasma Power [W]', None),
+                plasma_type=get_value(data, 'Gas-Plasma Gas', None, False),
+            )
         ],
     )
     return (f'{i}_{j}_cleaning', archive)
@@ -302,8 +364,9 @@ def map_substrate(data):
 
 
 def map_evaporation(i, j, lab_ids, data, upload_id):
-    archive = peroTF_CR_Angstrom_Evaporation(
+    archive = peroTF_Evaporation(
         name='evaporation ' + get_value(data, 'Material name', '', False),
+        location=get_value(data, 'Tool/GB name', '', False),
         positon_in_experimental_plan=i,
         description=get_value(data, 'Notes', '', False),
         samples=[
@@ -320,71 +383,81 @@ def map_evaporation(i, j, lab_ids, data, upload_id):
             )
         ],
     )
+    evaporation = None
+    if get_value(data, 'Organic', '', False).lower().startswith('n') or get_value(
+        data, 'Organic', '', False
+    ).lower().startswith('0'):
+        evaporation = InorganicEvaporation()
+        archive.inorganic_evaporation = [evaporation]
 
-    if get_value(data, 'Organic', '', False).lower().startswith('n'):
-        inorganic_evaporation = InorganicEvaporation(
-            thickness=get_value(data, 'Thickness [nm]'),
-            start_rate=get_value(data, 'Rate [angstrom/s]'),
-            chemical_2=PubChemPureSubstanceSectionCustom(
-                name=get_value(data, 'Material name', None, False), load_data=False
-            ),
-        )
-        archive.inorganic_evaporation = [inorganic_evaporation]
-
-    if get_value(data, 'Organic', '', False).lower().startswith('y'):
-        organic_evaporation = OrganicEvaporation(
-            thickness=get_value(data, 'Thickness [nm]'),
-            start_rate=get_value(data, 'Rate [angstrom/s]'),
+    if get_value(data, 'Organic', '', False).lower().startswith('y') or get_value(
+        data, 'Organic', '', False
+    ).lower().startswith('1'):
+        evaporation = OrganicEvaporation(
             temparature=[get_value(data, 'Temperature [°C]', None)] * 2
             if get_value(data, 'Temperature [°C]', None)
-            else None,
-            chemical_2=PubChemPureSubstanceSectionCustom(
-                name=get_value(data, 'Material name', None, False), load_data=False
-            ),
+            else None
         )
-        archive.organic_evaporation = [organic_evaporation]
+
+        archive.organic_evaporation = [evaporation]
+
+    evaporation.thickness = get_value(data, 'Thickness [nm]')
+    evaporation.start_rate = get_value(data, 'Rate [angstrom/s]')
+    evaporation.chemical_2 = PubChemPureSubstanceSectionCustom(
+        name=get_value(data, 'Material name', None, False), load_data=False
+    )
+    if get_value(data, 'Organic', '', False).lower().startswith('n') or get_value(
+        data, 'Organic', '', False
+    ).lower().startswith('0'):
+        archive.inorganic_evaporation = [evaporation]
+
+    if get_value(data, 'Organic', '', False).lower().startswith('y') or get_value(
+        data, 'Organic', '', False
+    ).lower().startswith('1'):
+        archive.organic_evaporation = [evaporation]
+
     material = get_value(data, 'Material name', '', False)
     return (f'{i}_{j}_evaporation_{material}', archive)
 
 
-# def map_sputtering(i, j, lab_ids, data, upload_id):
-#     archive = HySprint_Sputtering(
-#         name='sputtering ' + get_value(data, 'Material name', '', False),
-#         positon_in_experimental_plan=i,
-#         description=get_value(data, 'Notes', '', False),
-#         samples=[
-#             CompositeSystemReference(
-#                 reference=get_reference(upload_id, f'{lab_id}.archive.json'),
-#                 lab_id=lab_id,
-#             )
-#             for lab_id in lab_ids
-#         ],
-#         layer=[
-#             LayerProperties(
-#                 layer_type=get_value(data, 'Layer type', None, False),
-#                 layer_material_name=get_value(data, 'Material name', None, False),
-#             )
-#         ],
-#     )
-#     process = SputteringProcess(
-#         thickness=get_value(data, 'Thickness [nm]'),
-#         gas_flow_rate=get_value(data, 'Gas flow rate [cm^3/min]'),
-#         rotation_rate=get_value(data, 'Rotation rate [rpm]'),
-#         power=get_value(data, 'Power [W]'),
-#         temperature=get_value(data, 'Temperature [°C]'),
-#         deposition_time=get_value(data, 'Deposition time [s]'),
-#         burn_in_time=get_value(data, 'Burn in time [s]'),
-#         pressure=get_value(data, 'Pressure [mbar]'),
-#         target_2=PubChemPureSubstanceSectionCustom(
-#             name=get_value(data, 'Material name', None, False), load_data=False
-#         ),
-#         gas_2=PubChemPureSubstanceSectionCustom(
-#             name=get_value(data, 'Gas', None, False), load_data=False
-#         ),
-#     )
-#     archive.processes = [process]
-#     material = get_value(data, 'Material name', '', False)
-#     return (f'{i}_{j}_sputtering_{material}', archive)
+def map_sputtering(i, j, lab_ids, data, upload_id):
+    archive = peroTF_Sputtering(
+        name='sputtering ' + get_value(data, 'Material name', '', False),
+        positon_in_experimental_plan=i,
+        description=get_value(data, 'Notes', '', False),
+        samples=[
+            CompositeSystemReference(
+                reference=get_reference(upload_id, f'{lab_id}.archive.json'),
+                lab_id=lab_id,
+            )
+            for lab_id in lab_ids
+        ],
+        layer=[
+            LayerProperties(
+                layer_type=get_value(data, 'Layer type', None, False),
+                layer_material_name=get_value(data, 'Material name', None, False),
+            )
+        ],
+    )
+    process = SputteringProcess(
+        thickness=get_value(data, 'Thickness [nm]'),
+        gas_flow_rate=get_value(data, 'Gas flow rate [cm^3/min]'),
+        rotation_rate=get_value(data, 'Rotation rate [rpm]'),
+        power=get_value(data, 'Power [W]'),
+        temperature=get_value(data, 'Temperature [°C]'),
+        deposition_time=get_value(data, 'Deposition time [s]'),
+        burn_in_time=get_value(data, 'Burn in time [s]'),
+        pressure=get_value(data, 'Pressure [mbar]'),
+        target_2=PubChemPureSubstanceSectionCustom(
+            name=get_value(data, 'Material name', None, False), load_data=False
+        ),
+        gas_2=PubChemPureSubstanceSectionCustom(
+            name=get_value(data, 'Gas', None, False), load_data=False
+        ),
+    )
+    archive.processes = [process]
+    material = get_value(data, 'Material name', '', False)
+    return (f'{i}_{j}_sputtering_{material}', archive)
 
 
 # def map_laser_scribing(i, j, lab_ids, data, upload_id):
@@ -412,62 +485,62 @@ def map_evaporation(i, j, lab_ids, data, upload_id):
 #     return (f'{i}_{j}_laser_scribing', archive)
 
 
-# def map_atomic_layer_deposition(i, j, lab_ids, data, upload_id):
-#     archive = IRIS_AtomicLayerDeposition(
-#         name='atomic layer deposition '
-#         + get_value(data, 'Material name', '', number=False),
-#         positon_in_experimental_plan=i,
-#         description=get_value(data, 'Notes', '', number=False),
-#         samples=[
-#             CompositeSystemReference(
-#                 reference=get_reference(upload_id, f'{lab_id}.archive.json'),
-#                 lab_id=lab_id,
-#             )
-#             for lab_id in lab_ids
-#         ],
-#         layer=[
-#             LayerProperties(
-#                 layer_type=get_value(data, 'Layer type', None, number=False),
-#                 layer_material_name=get_value(
-#                     data, 'Material name', None, number=False
-#                 ),
-#             )
-#         ],
-#         properties=ALDPropertiesIris(
-#             source=get_value(data, 'Source', None, number=False),
-#             thickness=get_value(data, 'Thickness [nm]', None),
-#             temperature=get_value(data, 'Temperature [°C]', None),
-#             rate=get_value(data, 'Rate [A/s]', None),
-#             time=get_value(data, 'Time [s]', None),
-#             number_of_cycles=get_value(data, 'Number of cycles', None),
-#             material=ALDMaterial(
-#                 material=PubChemPureSubstanceSectionCustom(
-#                     name=get_value(data, 'Precursor 1', None, number=False),
-#                     load_data=False,
-#                 ),
-#                 pulse_duration=get_value(data, 'Pulse duration 1 [s]', None),
-#                 manifold_temperature=get_value(
-#                     data, 'Manifold temperature 1 [°C]', None
-#                 ),
-#                 bottle_temperature=get_value(data,
-#                          'Bottle temperature 1 [°C]', None),
-#             ),
-#             oxidizer_reducer=ALDMaterial(
-#                 material=PubChemPureSubstanceSectionCustom(
-#                     name=get_value(
-#                         data, 'Precursor 2 (Oxidizer/Reducer)', None, number=False
-#                     ),
-#                     load_data=False,
-#                 ),
-#                 pulse_duration=get_value(data, 'Pulse duration 2 [s]', None),
-#                 manifold_temperature=get_value(
-#                     data, 'Manifold temperature 2 [°C]', None
-#                 ),
-#             ),
-#         ),
-#     )
-#     material = get_value(data, 'Material name', '', number=False)
-#     return (f'{i}_{j}_ALD_{material}', archive)
+def map_atomic_layer_deposition(i, j, lab_ids, data, upload_id):
+    archive = peroTF_ALD(
+        name='atomic layer deposition '
+        + get_value(data, 'Material name', '', number=False),
+        location=get_value(data, 'Tool/GB name', '', False),
+        positon_in_experimental_plan=i,
+        description=get_value(data, 'Notes', '', number=False),
+        samples=[
+            CompositeSystemReference(
+                reference=get_reference(upload_id, f'{lab_id}.archive.json'),
+                lab_id=lab_id,
+            )
+            for lab_id in lab_ids
+        ],
+        layer=[
+            LayerProperties(
+                layer_type=get_value(data, 'Layer type', None, number=False),
+                layer_material_name=get_value(
+                    data, 'Material name', None, number=False
+                ),
+            )
+        ],
+        properties=ALDPropertiesIris(
+            source=get_value(data, 'Source', None, number=False),
+            thickness=get_value(data, 'Thickness [nm]', None),
+            temperature=get_value(data, 'Temperature [°C]', None),
+            rate=get_value(data, 'Rate [A/s]', None),
+            time=get_value(data, 'Time [s]', None),
+            number_of_cycles=get_value(data, 'Number of cycles', None),
+            material=ALDMaterial(
+                material=PubChemPureSubstanceSectionCustom(
+                    name=get_value(data, 'Precursor 1', None, number=False),
+                    load_data=False,
+                ),
+                pulse_duration=get_value(data, 'Pulse duration 1 [s]', None),
+                manifold_temperature=get_value(
+                    data, 'Manifold temperature 1 [°C]', None
+                ),
+                bottle_temperature=get_value(data, 'Bottle temperature 1 [°C]', None),
+            ),
+            oxidizer_reducer=ALDMaterial(
+                material=PubChemPureSubstanceSectionCustom(
+                    name=get_value(
+                        data, 'Precursor 2 (Oxidizer/Reducer)', None, number=False
+                    ),
+                    load_data=False,
+                ),
+                pulse_duration=get_value(data, 'Pulse duration 2 [s]', None),
+                manifold_temperature=get_value(
+                    data, 'Manifold temperature 2 [°C]', None
+                ),
+            ),
+        ),
+    )
+    material = get_value(data, 'Material name', '', number=False)
+    return (f'{i}_{j}_ALD_{material}', archive)
 
 
 def map_generic(i, j, lab_ids, data, upload_id):
@@ -588,13 +661,13 @@ class PeroTFExperimentParser(MatchingParser):
                 # if 'Slot Die Coating' in col:
                 #     archives.append(map_sdc(i, j, lab_ids, row, upload_id))
 
-                # if 'Sputtering' in col:
-                #     archives.append(map_sputtering(i, j, lab_ids, row, upload_id))
+                if 'Sputtering' in col:
+                    archives.append(map_sputtering(i, j, lab_ids, row, upload_id))
 
-                # if 'ALD' in col:
-                #     archives.append(
-                #         map_atomic_layer_deposition(i, j, lab_ids, row, upload_id)
-                #     )
+                if 'ALD' in col:
+                    archives.append(
+                        map_atomic_layer_deposition(i, j, lab_ids, row, upload_id)
+                    )
 
         refs = []
         for subs in substrates:

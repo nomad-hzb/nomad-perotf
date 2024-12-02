@@ -9,6 +9,7 @@ from baseclasses.material_processes_misc import (
     Cleaning,
     PlasmaCleaning,
     SolutionCleaning,
+    UVCleaning,
 )
 from baseclasses.solar_energy import (
     # PLMeasurement,
@@ -25,7 +26,12 @@ from baseclasses.solar_energy import (
     Substrate,
 )
 from baseclasses.solution import Solution
-from baseclasses.vapour_based_deposition import Evaporations, Sputtering
+from baseclasses.vapour_based_deposition import (
+    ALDPropertiesIris,
+    AtomicLayerDeposition,
+    Evaporations,
+    Sputtering,
+)
 from baseclasses.wet_chemical_deposition import (
     BladeCoating,
     SlotDieCoating,
@@ -182,6 +188,30 @@ class peroTF_Batch(Batch, EntryData):
 # %% ####################### Cleaning
 
 
+class peroTF_Cleaning(Cleaning, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                ]
+            ),
+        )
+    )
+
+    cleaning = SubSection(section_def=SolutionCleaning, repeats=True)
+
+    cleaning_uv = SubSection(section_def=UVCleaning, repeats=True)
+
+    cleaning_plasma = SubSection(section_def=PlasmaCleaning, repeats=True)
+
+
 class peroTF_CR_Wetbench_Cleaning(Cleaning, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -265,6 +295,26 @@ class peroTF_BladeCoating(BladeCoating, EntryData):
 
 
 # %% ### Spin Coating
+class peroTF_SpinCoating(SpinCoating, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'recipe' 'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'solution',
+                    'layer',
+                    'quenching',
+                    'annealing',
+                ]
+            ),
+        ),
+    )
 
 
 class peroTF_CR_SpinBox_SpinCoating(SpinCoating, EntryData):
@@ -418,6 +468,27 @@ class peroTF_CR_BetaBox_SpinCoating(SpinCoating, EntryData):
 
 
 # %% ### Slot Die Coating
+class peroTF_SlotDieCoating(SlotDieCoating, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'solution',
+                    'layer',
+                    'properties',
+                    'quenching',
+                    'annealing',
+                ]
+            ),
+        ),
+    )
 
 
 class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
@@ -521,7 +592,67 @@ class peroTF_TFL_ThermalAnnealing(BaseProcess, EntryData):
     )
 
 
+# %% ### Atomic Layer Deposition
+class peroTF_ALD(AtomicLayerDeposition, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'results'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'batch',
+                    'samples',
+                    'layer',
+                ]
+            ),
+        )
+    )
+
+    properties = SubSection(section_def=ALDPropertiesIris)
+
+
 # %% ### Evaporation
+
+
+class peroTF_Evaporation(Evaporations, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'location',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'layer',
+                ]
+            ),
+        )
+    )
+
+
+class peroTF_Sputtering(Sputtering, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'layer',
+                ]
+            ),
+        )
+    )
 
 
 class peroTF_TFL_SputterSystem_Sputtering(Sputtering, EntryData):
