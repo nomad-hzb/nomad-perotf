@@ -227,7 +227,7 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
             if get_value(data, f'Rotation time {step}[s]')
         ],
     )
-    if get_value(data, 'Anti solvent volume [ml]', None):
+    if get_value(data, 'Anti solvent name', None, False):
         archive.quenching = AntiSolventQuenching(
             anti_solvent_volume=get_value(data, 'Anti solvent volume [ml]', None),
             anti_solvent_dropping_time=get_value(
@@ -243,7 +243,7 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
                 name=get_value(data, 'Anti solvent name', None, False), load_data=False
             ),
         )
-    if get_value(data, 'Gas quenching start time [s]', None):
+    if get_value(data, 'Gas', None, False):
         archive.quenchingGasQuenchingWithNozzle(
             starting_delay=get_value(data, 'Gas quenching start time [s]', None),
             flow_rate=get_value(data, 'Gas quenching flow rate [ml/s]', None),
