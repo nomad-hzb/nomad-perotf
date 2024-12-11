@@ -30,6 +30,7 @@ from baseclasses.material_processes_misc import (
     AirKnifeGasQuenching,
     Annealing,
     AntiSolventQuenching,
+    GasQuenchingWithNozzle,
     PlasmaCleaning,
     SolutionCleaning,
     UVCleaning,
@@ -244,7 +245,7 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
             ),
         )
     if get_value(data, 'Gas', None, False):
-        archive.quenchingGasQuenchingWithNozzle(
+        archive.quenching = GasQuenchingWithNozzle(
             starting_delay=get_value(data, 'Gas quenching start time [s]', None),
             flow_rate=get_value(data, 'Gas quenching flow rate [ml/s]', None),
             height=get_value(data, 'Gas quenching height [mm]', None),
@@ -253,9 +254,7 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
             velocity=get_value(data, 'Gas quenching velocity [m/s]', None),
             nozzle_shape=get_value(data, 'Nozzle shape', None, False),
             nozzle_size=get_value(data, 'Nozzle size [mm²]', None, False),
-            gas=PubChemPureSubstanceSectionCustom(
-                name=get_value(data, 'Gas', None, False), load_data=False
-            ),
+            gas=get_value(data, 'Gas', None, False),
         )
 
     material = get_value(data, 'Material name', '', False)
