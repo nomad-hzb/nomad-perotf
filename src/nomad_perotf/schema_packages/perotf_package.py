@@ -34,6 +34,8 @@ from baseclasses.vapour_based_deposition import (
 )
 from baseclasses.wet_chemical_deposition import (
     BladeCoating,
+    DipCoating,
+    InkjetPrinting,
     SlotDieCoating,
     SpinCoating,
     SpinCoatingRecipe,
@@ -785,6 +787,58 @@ class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
                 ]
             ),
         )
+    )
+
+
+# %% ## DipCoating
+
+
+class peroTF_DipCoating(DipCoating, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'solution',
+                    'layer',
+                    'properties',
+                    'quenching',
+                    'annealing',
+                ]
+            ),
+        ),
+    )
+
+
+# %% ## Printing
+
+
+class peroTF_InkjetPrinting(InkjetPrinting, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            properties=dict(
+                order=[
+                    'name',
+                    'present',
+                    'datetime',
+                    'previous_process',
+                    'batch',
+                    'samples',
+                    'solution',
+                    'layer',
+                    'properties',
+                    'quenching',
+                    'annealing',
+                ]
+            ),
+        ),
     )
 
 

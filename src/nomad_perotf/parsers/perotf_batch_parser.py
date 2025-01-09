@@ -25,6 +25,7 @@ Created on Fri Sep 27 09:08:03 2024
 
 import pandas as pd
 from baseclasses import LayerProperties, PubChemPureSubstanceSectionCustom
+from baseclasses.atmosphere import Atmosphere
 from baseclasses.helper.utilities import create_archive
 from baseclasses.material_processes_misc import (
     AirKnifeGasQuenching,
@@ -34,6 +35,7 @@ from baseclasses.material_processes_misc import (
     PlasmaCleaning,
     SolutionCleaning,
     UVCleaning,
+    VacuumQuenching,
 )
 from baseclasses.solution import Solution, SolutionChemical
 from baseclasses.vapour_based_deposition.atomic_layer_deposition import (
@@ -46,6 +48,12 @@ from baseclasses.vapour_based_deposition.evaporation import (
 )
 from baseclasses.vapour_based_deposition.sputtering import SputteringProcess
 from baseclasses.wet_chemical_deposition import PrecursorSolution
+from baseclasses.wet_chemical_deposition.dip_coating import DipCoatingProperties
+from baseclasses.wet_chemical_deposition.inkjet_printing import (
+    InkjetPrintingProperties,
+    PrintHeadPath,
+    PrintHeadProperties,
+)
 from baseclasses.wet_chemical_deposition.slot_die_coating import (
     SlotDieCoatingProperties,
 )
@@ -67,7 +75,9 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_ALD,
     peroTF_Batch,
     peroTF_Cleaning,
+    peroTF_DipCoating,
     peroTF_Evaporation,
+    peroTF_InkjetPrinting,
     peroTF_Process,
     peroTF_Sample,
     peroTF_SlotDieCoating,
@@ -244,6 +254,13 @@ def map_spin_coating(i, j, lab_ids, data, upload_id):
                 name=get_value(data, 'Anti solvent name', None, False), load_data=False
             ),
         )
+    if get_value(data, 'Vacuum quenching duration [s]', None, False):
+        archive.quenching = VacuumQuenching(
+            start_time=get_value(data, 'Vacuum quenching start time [s]', None),
+            duration=get_value(data, 'Vacuum quenching duration [s]', None),
+            pressure=get_value(data, 'Vacuum quenching pressure [bar]', None),
+        )
+
     if get_value(data, 'Gas', None, False):
         archive.quenching = GasQuenchingWithNozzle(
             starting_delay=get_value(data, 'Gas quenching start time [s]', None),
@@ -309,6 +326,67 @@ def map_sdc(i, j, lab_ids, data, upload_id):
     )
     material = get_value(data, 'Material name', '', False)
     return (f'{i}_{j}_slot_die_coating_{material}', archive)
+
+
+def map_inkjet_printing(i, j, lab_ids, data, upload_id):
+    archive = peroTF_InkjetPrinting(
+        name='inkjet printing ' + get_value(data, 'Material name', '', False),
+        location=get_value(data, 'Tool/GB name', '', False),
+        positon_in_experimental_plan=i,
+        description=get_value(data, 'Notes', None, False),
+        samples=[
+            CompositeSystemReference(
+                reference=get_reference(upload_id, f'{lab_id}.archive.json'),
+                lab_id=lab_id,
+            )
+            for lab_id in lab_ids
+        ],
+        solution=[
+            PrecursorSolution(
+                solution_details=map_solutions(data),  # check unit
+                # check unit
+                solution_volume=convert_quantity(
+                    get_value(data, 'Solution volume [um]', None), 1 / 1000
+                ),
+            )
+        ],
+        layer=[
+            LayerProperties(
+                layer_type=get_value(data, 'Layer type', None, False),
+                layer_material_name=get_value(data, 'Material name', None, False),
+            )
+        ],
+        properties=InkjetPrintingProperties(
+            print_head_properties=PrintHeadProperties(
+                number_of_active_print_nozzles=get_value(
+                    data, 'Number of active nozzles', None
+                ),
+                print_nozzle_drop_frequency=get_value(
+                    data, 'Droplet per second [1/s]', None
+                ),
+                print_nozzle_drop_volume=get_value(data, 'Droplet volume [pl]', None),
+                print_head_temperature=get_value(data, 'Nozzle temperature [°C]', None),
+                print_head_name=get_value(data, 'Printhead name', None, False),
+            ),
+            cartridge_pressure=get_value(data, 'Ink reservoir pressure [bar]', None),
+            substrate_temperature=get_value(data, 'Table temperature [°C]', None),
+            drop_density=get_value(data, 'Droplet density [dpi]', None),
+            printed_area=get_value(data, 'Printed area [mm²]', None),
+        ),
+        print_head_path=PrintHeadPath(
+            quality_factor=get_value(data, 'Quality factor', None, False)
+        ),
+        atmosphere=Atmosphere(
+            relative_humidity=get_value(data, 'rel. humidity [%]', None)
+        ),
+        annealing=Annealing(
+            temperature=get_value(data, 'Annealing temperature [°C]', None),
+            time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
+            atmosphere=get_value(data, 'Annealing athmosphere', None, False),
+        ),
+    )
+    material = get_value(data, 'Material name', '', False)
+    return (f'{i}_{j}_inkjet_printing_{material}', archive)
 
 
 def map_cleaning(i, j, lab_ids, data, upload_id):
@@ -423,6 +501,7 @@ def map_sputtering(i, j, lab_ids, data, upload_id):
     archive = peroTF_Sputtering(
         name='sputtering ' + get_value(data, 'Material name', '', False),
         positon_in_experimental_plan=i,
+        location=get_value(data, 'Tool/GB name', '', False),
         description=get_value(data, 'Notes', '', False),
         samples=[
             CompositeSystemReference(
@@ -457,6 +536,47 @@ def map_sputtering(i, j, lab_ids, data, upload_id):
     archive.processes = [process]
     material = get_value(data, 'Material name', '', False)
     return (f'{i}_{j}_sputtering_{material}', archive)
+
+
+def map_dip_coating(i, j, lab_ids, data, upload_id):
+    archive = peroTF_DipCoating(
+        name='dip coating ' + get_value(data, 'Material name', '', False),
+        location=get_value(data, 'Tool/GB name', '', False),
+        positon_in_experimental_plan=i,
+        description=get_value(data, 'Notes', None, False),
+        samples=[
+            CompositeSystemReference(
+                reference=get_reference(upload_id, f'{lab_id}.archive.json'),
+                lab_id=lab_id,
+            )
+            for lab_id in lab_ids
+        ],
+        solution=[
+            PrecursorSolution(
+                solution_details=map_solutions(data),  # check unit
+                # check unit
+                solution_volume=convert_quantity(
+                    get_value(data, 'Solution volume [um]', None), 1 / 1000
+                ),
+            )
+        ],
+        layer=[
+            LayerProperties(
+                layer_type=get_value(data, 'Layer type', None, False),
+                layer_material_name=get_value(data, 'Material name', None, False),
+            )
+        ],
+        properties=DipCoatingProperties(
+            time=convert_quantity(get_value(data, 'Dipping duration [s]'), 1 / 60),
+        ),
+        annealing=Annealing(
+            temperature=get_value(data, 'Annealing temperature [°C]', None),
+            time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
+            atmosphere=get_value(data, 'Annealing athmosphere', None, False),
+        ),
+    )
+    material = get_value(data, 'Material name', '', False)
+    return (f'{i}_{j}_dip_coating_{material}', archive)
 
 
 # def map_laser_scribing(i, j, lab_ids, data, upload_id):
@@ -656,6 +776,12 @@ class PeroTFExperimentParser(MatchingParser):
 
                 if 'Spin Coating' in col:
                     archives.append(map_spin_coating(i, j, lab_ids, row, upload_id))
+
+                if 'Inkjet Printing' in col:
+                    archives.append(map_inkjet_printing(i, j, lab_ids, row, upload_id))
+
+                if 'Dip Coating' in col:
+                    archives.append(map_dip_coating(i, j, lab_ids, row, upload_id))
 
                 # if 'Slot Die Coating' in col:
                 #     archives.append(map_sdc(i, j, lab_ids, row, upload_id))
