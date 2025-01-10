@@ -374,7 +374,8 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
             printed_area=get_value(data, 'Printed area [mm²]', None),
         ),
         print_head_path=PrintHeadPath(
-            quality_factor=get_value(data, 'Quality factor', None, False)
+            quality_factor=get_value(data, 'Quality factor', None, False),
+            step_size=get_value(data, 'Step size', None),
         ),
         atmosphere=Atmosphere(
             relative_humidity=get_value(data, 'rel. humidity [%]', None)
