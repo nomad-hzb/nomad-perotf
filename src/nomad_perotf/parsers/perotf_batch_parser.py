@@ -362,6 +362,7 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
             )
         ],
         properties=InkjetPrintingProperties(
+            printing_run=get_value(data, 'Printing run', None, False),
             print_head_properties=PrintHeadProperties(
                 number_of_active_print_nozzles=get_value(
                     data, 'Number of active nozzles', None
@@ -369,8 +370,9 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
                 print_nozzle_drop_frequency=get_value(
                     data, 'Droplet per second [1/s]', None
                 ),
-                print_nozzle_drop_volume=get_value(data, 'Droplet volume [pl]', None),
+                print_nozzle_drop_volume=get_value(data, 'Droplet volume [pL]', None),
                 print_head_temperature=get_value(data, 'Nozzle temperature [°C]', None),
+                print_head_distance_to_substrate=get_value(data, "Dropping Height [mm]", None),
                 print_head_name=get_value(data, 'Printhead name', None, False),
             ),
             cartridge_pressure=get_value(data, 'Ink reservoir pressure [bar]', None),
@@ -381,9 +383,11 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
         print_head_path=PrintHeadPath(
             quality_factor=get_value(data, 'Quality factor', None, False),
             step_size=get_value(data, 'Step size', None),
+            directional=get_value(data, 'Printing direction', None, False), 
         ),
         atmosphere=Atmosphere(
-            relative_humidity=get_value(data, 'rel. humidity [%]', None)
+            relative_humidity=get_value(data, 'rel. humidity [%]', None),
+            temperature=get_value(data, 'Room Temperature [°C]', None),
         ),
         annealing=Annealing(
             temperature=get_value(data, 'Annealing temperature [°C]', None),
