@@ -311,17 +311,22 @@ def map_sdc(i, j, lab_ids, data, upload_id):
             time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
         ),
         properties=SlotDieCoatingProperties(
-            flow_rate=convert_quantity(data.get('Flow rate [ul/min]', None), 1 / 1000),
+            coating_run=get_value(data, 'Coating run', None, False),    
+            flow_rate=convert_quantity(data.get('Flow rate [uL/min]', None), 1 / 1000),
             slot_die_head_distance_to_thinfilm=get_value(data, 'Head gap [mm]'),
             slot_die_head_speed=get_value(data, 'Speed [mm/s]'),
+            coated_area=get_value(data, 'Coated area [mm²]'),
         ),
         quenching=AirKnifeGasQuenching(
             air_knife_angle=get_value(data, 'Air knife angle [°]', None),
-            bead_volume=get_value(data, 'Bead volume [mm/s]', None),
+            bead_volume=get_value(data, 'Bead volume [mm/s]', None), # is this the same as (drying) gas flow rate/velocity?
             drying_speed=get_value(data, 'Drying speed [cm/min]', None),
             air_knife_distance_to_thin_film=convert_quantity(
                 data.get('Air knife gap [cm]', None), 10000
             ),
+            drying_gas_temperature =  get_value(data, "Drying gas temperature [°]", None),
+            heat_transfer_coefficient =  get_value(data, "Heat transfer coefficient [W m^-2 K^-1]", None),
+        
         ),
     )
     material = get_value(data, 'Material name', '', False)
@@ -357,6 +362,7 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
             )
         ],
         properties=InkjetPrintingProperties(
+            printing_run=get_value(data, 'Printing run', None, False),
             print_head_properties=PrintHeadProperties(
                 number_of_active_print_nozzles=get_value(
                     data, 'Number of active nozzles', None
@@ -364,8 +370,9 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
                 print_nozzle_drop_frequency=get_value(
                     data, 'Droplet per second [1/s]', None
                 ),
-                print_nozzle_drop_volume=get_value(data, 'Droplet volume [pl]', None),
+                print_nozzle_drop_volume=get_value(data, 'Droplet volume [pL]', None),
                 print_head_temperature=get_value(data, 'Nozzle temperature [°C]', None),
+                print_head_distance_to_substrate=get_value(data, "Dropping Height [mm]", None),
                 print_head_name=get_value(data, 'Printhead name', None, False),
             ),
             cartridge_pressure=get_value(data, 'Ink reservoir pressure [bar]', None),
@@ -376,9 +383,11 @@ def map_inkjet_printing(i, j, lab_ids, data, upload_id):
         print_head_path=PrintHeadPath(
             quality_factor=get_value(data, 'Quality factor', None, False),
             step_size=get_value(data, 'Step size', None),
+            directional=get_value(data, 'Printing direction', None, False), 
         ),
         atmosphere=Atmosphere(
-            relative_humidity=get_value(data, 'rel. humidity [%]', None)
+            relative_humidity=get_value(data, 'rel. humidity [%]', None),
+            temperature=get_value(data, 'Room Temperature [°C]', None),
         ),
         annealing=Annealing(
             temperature=get_value(data, 'Annealing temperature [°C]', None),
@@ -784,8 +793,8 @@ class PeroTFExperimentParser(MatchingParser):
                 if 'Dip Coating' in col:
                     archives.append(map_dip_coating(i, j, lab_ids, row, upload_id))
 
-                # if 'Slot Die Coating' in col:
-                #     archives.append(map_sdc(i, j, lab_ids, row, upload_id))
+                if 'Slot Die Coating' in col:
+                    archives.append(map_sdc(i, j, lab_ids, row, upload_id))
 
                 if 'Sputtering' in col:
                     archives.append(map_sputtering(i, j, lab_ids, row, upload_id))
