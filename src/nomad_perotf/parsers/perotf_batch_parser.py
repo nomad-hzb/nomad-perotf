@@ -311,9 +311,10 @@ def map_sdc(i, j, lab_ids, data, upload_id):
             time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
         ),
         properties=SlotDieCoatingProperties(
-            flow_rate=convert_quantity(data.get('Flow rate [ul/min]', None), 1 / 1000),
+            flow_rate=convert_quantity(data.get('Flow rate [uL/min]', None), 1 / 1000),
             slot_die_head_distance_to_thinfilm=get_value(data, 'Head gap [mm]'),
             slot_die_head_speed=get_value(data, 'Speed [mm/s]'),
+            #"Coated area [mm²]"
         ),
         quenching=AirKnifeGasQuenching(
             air_knife_angle=get_value(data, 'Air knife angle [°]', None),
@@ -322,6 +323,9 @@ def map_sdc(i, j, lab_ids, data, upload_id):
             air_knife_distance_to_thin_film=convert_quantity(
                 data.get('Air knife gap [cm]', None), 10000
             ),
+            #"Drying gas temperature [°]"
+            #"Heat transfer coefficient [W m^-2 K^-1]"
+            #"Nozzle Height [mm]"
         ),
     )
     material = get_value(data, 'Material name', '', False)
@@ -784,8 +788,8 @@ class PeroTFExperimentParser(MatchingParser):
                 if 'Dip Coating' in col:
                     archives.append(map_dip_coating(i, j, lab_ids, row, upload_id))
 
-                # if 'Slot Die Coating' in col:
-                #     archives.append(map_sdc(i, j, lab_ids, row, upload_id))
+                if 'Slot Die Coating' in col:
+                    archives.append(map_sdc(i, j, lab_ids, row, upload_id))
 
                 if 'Sputtering' in col:
                     archives.append(map_sputtering(i, j, lab_ids, row, upload_id))
