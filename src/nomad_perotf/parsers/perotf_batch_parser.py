@@ -311,21 +311,22 @@ def map_sdc(i, j, lab_ids, data, upload_id):
             time=convert_quantity(get_value(data, 'Annealing time [min]', None), 60),
         ),
         properties=SlotDieCoatingProperties(
+            coating_run=get_value(data, 'Coating run', None, False),    
             flow_rate=convert_quantity(data.get('Flow rate [uL/min]', None), 1 / 1000),
             slot_die_head_distance_to_thinfilm=get_value(data, 'Head gap [mm]'),
             slot_die_head_speed=get_value(data, 'Speed [mm/s]'),
-            #"Coated area [mm²]"
+            coated_area=get_value(data, 'Coated area [mm²]'),
         ),
         quenching=AirKnifeGasQuenching(
             air_knife_angle=get_value(data, 'Air knife angle [°]', None),
-            bead_volume=get_value(data, 'Bead volume [mm/s]', None),
+            bead_volume=get_value(data, 'Bead volume [mm/s]', None), # is this the same as (drying) gas flow rate/velocity?
             drying_speed=get_value(data, 'Drying speed [cm/min]', None),
             air_knife_distance_to_thin_film=convert_quantity(
                 data.get('Air knife gap [cm]', None), 10000
             ),
-            #"Drying gas temperature [°]"
-            #"Heat transfer coefficient [W m^-2 K^-1]"
-            #"Nozzle Height [mm]"
+            drying_gas_temperature =  get_value(data, "Drying gas temperature [°]", None),
+            heat_transfer_coefficient =  get_value(data, "Heat transfer coefficient [W m^-2 K^-1]", None),
+        
         ),
     )
     material = get_value(data, 'Material name', '', False)
