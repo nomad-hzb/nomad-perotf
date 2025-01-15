@@ -24,7 +24,6 @@ Created on Fri Sep 27 09:08:03 2024
 #
 
 import pandas as pd
-from baseclasses.helper.utilities import create_archive
 from baseclasses.helper.solar_cell_batch_mapping import (
     get_reference,
     map_atomic_layer_deposition,
@@ -40,6 +39,7 @@ from baseclasses.helper.solar_cell_batch_mapping import (
     map_sputtering,
     map_substrate,
 )
+from baseclasses.helper.utilities import create_archive
 from nomad.datamodel import EntryArchive
 from nomad.datamodel.data import (
     EntryData,
@@ -66,10 +66,6 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_Sputtering,
     peroTF_Substrate,
 )
-
-"""
-This is a hello world style example for an example parser/converter.
-"""
 
 
 class RawHySprintExperiment(EntryData):
@@ -111,6 +107,11 @@ class PeroTFExperimentParser(MatchingParser):
             'Sample area [cm^2]',
             'Substrate material',
             'Substrate conductive layer',
+            'Notes',
+            'Bottom Cell Name',
+        ]
+        substrates_col = [
+            s for s in substrates_col if s in df['Experiment Info'].columns
         ]
         for i, sub in (
             df['Experiment Info'][substrates_col].drop_duplicates().iterrows()
@@ -129,19 +130,7 @@ class PeroTFExperimentParser(MatchingParser):
         for i, row in df['Experiment Info'].iterrows():
             if pd.isna(row).all():
                 continue
-            substrate_name = (
-                find_substrate(
-                    row[
-                        [
-                            'Sample dimension',
-                            'Sample area [cm^2]',
-                            'Substrate material',
-                            'Substrate conductive layer',
-                        ]
-                    ]
-                )
-                + '.archive.json'
-            )
+            substrate_name = find_substrate(row[substrates_col]) + '.archive.json'
             archives.append(
                 map_basic_sample(row, substrate_name, upload_id, peroTF_Sample)
             )

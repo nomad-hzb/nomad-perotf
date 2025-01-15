@@ -118,7 +118,7 @@ class peroTF_Chemical(Chemical, EntryData):
 class peroTF_Substrate(Substrate, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users'],
+            hide=['users'],
             properties=dict(
                 order=[
                     'name',
