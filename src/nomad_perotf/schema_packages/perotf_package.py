@@ -29,6 +29,7 @@ from baseclasses.solution import Solution
 from baseclasses.vapour_based_deposition import (
     ALDPropertiesIris,
     AtomicLayerDeposition,
+    CloseSpaceSublimation,
     Evaporations,
     Sputtering,
 )
@@ -193,7 +194,7 @@ class peroTF_Batch(Batch, EntryData):
 class peroTF_Cleaning(Cleaning, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
@@ -277,7 +278,15 @@ class peroTF_CR_Plasma_Cleaning(Cleaning, EntryData):
 class peroTF_BladeCoating(BladeCoating, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'results'],
+            hide=[
+                'lab_id',
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'present',
+            ],
             properties=dict(
                 order=[
                     'name',
@@ -300,7 +309,7 @@ class peroTF_BladeCoating(BladeCoating, EntryData):
 class peroTF_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
@@ -473,7 +482,7 @@ class peroTF_CR_BetaBox_SpinCoating(SpinCoating, EntryData):
 class peroTF_SlotDieCoating(SlotDieCoating, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
@@ -518,6 +527,35 @@ class peroTF_UP_SlotDieBox_SlotDieCoating(SlotDieCoating, EntryData):
 
 
 # # %% ### Annealing
+class peroTF_ThermalAnnealing(BaseProcess, EntryData):
+    annealing = SubSection(
+        links=['http://purl.obolibrary.org/obo/RO_0001019'], section_def=Annealing
+    )
+
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'humidity',
+                'present',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'datetime',
+                    'batch',
+                    'samples',
+                ]
+            ),
+        ),
+        a_template=dict(
+            layer_type='Absorber Layer',
+        ),
+    )
 
 
 class peroTF_CR_ThermalAnnealing(BaseProcess, EntryData):
@@ -598,7 +636,15 @@ class peroTF_TFL_ThermalAnnealing(BaseProcess, EntryData):
 class peroTF_ALD(AtomicLayerDeposition, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'results'],
+            hide=[
+                'lab_id',
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'present',
+            ],
             properties=dict(
                 order=[
                     'name',
@@ -616,19 +662,35 @@ class peroTF_ALD(AtomicLayerDeposition, EntryData):
 
 
 # %% ### Evaporation
-
-
-class peroTF_Evaporation(Evaporations, EntryData):
+class peroTF_CloseSpaceSublimation(CloseSpaceSublimation, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
                     'location',
                     'present',
                     'datetime',
-                    'previous_process',
+                    'batch',
+                    'samples',
+                    'layer',
+                ]
+            ),
+        )
+    )
+
+
+class peroTF_Evaporation(Evaporations, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
+            properties=dict(
+                order=[
+                    'name',
+                    'location',
+                    'present',
+                    'datetime',
                     'batch',
                     'samples',
                     'layer',
@@ -641,13 +703,12 @@ class peroTF_Evaporation(Evaporations, EntryData):
 class peroTF_Sputtering(Sputtering, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
                     'present',
                     'datetime',
-                    'previous_process',
                     'batch',
                     'samples',
                     'layer',
@@ -796,7 +857,7 @@ class peroTF_UP_OPTIvap_Evaporation(Evaporations, EntryData):
 class peroTF_DipCoating(DipCoating, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',
@@ -822,7 +883,7 @@ class peroTF_DipCoating(DipCoating, EntryData):
 class peroTF_InkjetPrinting(InkjetPrinting, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments'],
+            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present'],
             properties=dict(
                 order=[
                     'name',

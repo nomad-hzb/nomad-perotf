@@ -26,10 +26,12 @@ Created on Fri Sep 27 09:08:03 2024
 import pandas as pd
 from baseclasses.helper.solar_cell_batch_mapping import (
     get_reference,
+    map_annealing_class,
     map_atomic_layer_deposition,
     map_basic_sample,
     map_batch,
     map_cleaning,
+    map_close_space_sublimation,
     map_dip_coating,
     map_evaporation,
     map_generic,
@@ -56,6 +58,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_ALD,
     peroTF_Batch,
     peroTF_Cleaning,
+    peroTF_CloseSpaceSublimation,
     peroTF_DipCoating,
     peroTF_Evaporation,
     peroTF_InkjetPrinting,
@@ -65,6 +68,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_SpinCoating,
     peroTF_Sputtering,
     peroTF_Substrate,
+    peroTF_ThermalAnnealing,
 )
 
 
@@ -97,7 +101,7 @@ class PeroTFExperimentParser(MatchingParser):
         upload_id = archive.metadata.upload_id
         # xls = pd.ExcelFile(mainfile)
         df = pd.read_excel(mainfile, header=[0, 1])
-
+        df = df[~df['Experiment Info']['Nomad ID'].isna()]
         sample_ids = df['Experiment Info']['Nomad ID'].dropna().to_list()
         batch_id = '_'.join(sample_ids[0].split('_')[:-1])
         archives = [map_batch(sample_ids, batch_id, upload_id, peroTF_Batch)]
@@ -159,13 +163,36 @@ class PeroTFExperimentParser(MatchingParser):
                         map_generic(i, j, lab_ids, row, upload_id, peroTF_Process)
                     )
 
+                if 'Annealing' in col:  # move up
+                    archives.append(
+                        map_annealing_class(
+                            i, j, lab_ids, row, upload_id, peroTF_ThermalAnnealing
+                        )
+                    )
+
                 if pd.isna(row.get('Material name')):
                     continue
 
                 if 'Evaporation' in col:
+                    coevaporation = False
+                    if 'Co-Evaporation' in col:
+                        coevaporation = True
                     archives.append(
                         map_evaporation(
-                            i, j, lab_ids, row, upload_id, peroTF_Evaporation
+                            i,
+                            j,
+                            lab_ids,
+                            row,
+                            upload_id,
+                            peroTF_Evaporation,
+                            coevaporation,
+                        )
+                    )
+
+                if 'Close Space Sublimation' in col:
+                    archives.append(
+                        map_close_space_sublimation(
+                            i, j, lab_ids, row, upload_id, peroTF_CloseSpaceSublimation
                         )
                     )
 
