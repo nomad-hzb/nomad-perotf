@@ -145,6 +145,8 @@ class PeroTFExperimentParser(MatchingParser):
 
             df_dropped = df[col].drop_duplicates()
             for j, row in df_dropped.iterrows():
+                if row.isnull().all():
+                    continue
                 lab_ids = [
                     x['Experiment Info']['Nomad ID']
                     for _, x in df[['Experiment Info', col]].iterrows()
