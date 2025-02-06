@@ -1140,6 +1140,213 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
         super().normalize(archive, logger)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+class peroTF_Tandem_JVmeasurement(JVMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'certified_values',
+                'certification_institute',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'active_area',
+                    'intensity',
+                    'integration_time',
+                    'settling_time',
+                    'averaging',
+                    'compliance',
+                    'samples',
+                ]
+            ),
+        ),
+        a_plot=[
+            {
+                'x': 'jv_curve/:/voltage',
+                'y': 'jv_curve/:/current_density',
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+            }
+        ],
+    )
+
+    multijunction_position = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(suggestions=['top', 'mid', 'bottom']),
+        ),
+    )
+
+    data_file_reverse = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+
+    def normalize(self, archive, logger):
+        super(JVMeasurement, self).normalize(archive, logger)
+        self.method = 'JV Measurement'
+
+        if self.data_file:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(
+                self.data_file, 'tr', encoding=encoding
+            ) as f:
+                from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                jv_dict = get_jv_data(f.read())
+                try:
+                    self.datetime = convert_datetime(
+                        jv_dict['datetime'],
+                        datetime_format='%Y-%m-%d %H:%M:%S %p',
+                        utc=False,
+                    )
+
+                except Exception:
+                    try:
+                        self.datetime = convert_datetime(
+                            jv_dict['datetime'],
+                            datetime_format='%Y-%m-%d %H:%M:%S',
+                            utc=False,
+                        )
+                    except Exception:
+                        logger.warning('Couldnt parse datetime')
+                get_jv_archive(jv_dict, self.data_file, self)
+
+
+        if not self.data_file_reverse:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+
+            if "rev" in archive.m_context.raw_file(self.data_file):
+                with archive.m_context.raw_file(
+                    self.data_file, 'tr', encoding=encoding
+                ) as f:
+                    from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+                    from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                    jv_dict = get_jv_data(f.read())
+                    try:
+                        self.datetime = convert_datetime(
+                            jv_dict['datetime'],
+                            datetime_format='%Y-%m-%d %H:%M:%S %p',
+                            utc=False,
+                        )
+
+                    except Exception:
+                        try:
+                            self.datetime = convert_datetime(
+                                jv_dict['datetime'],
+                                datetime_format='%Y-%m-%d %H:%M:%S',
+                                utc=False,
+                            )
+                        except Exception:
+                            logger.warning('Couldnt parse datetime')
+                    get_jv_archive(jv_dict, self.data_file, self)
+
+
+
+
+        super().normalize(archive, logger)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
