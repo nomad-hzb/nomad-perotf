@@ -30,6 +30,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_Measurement,
     peroTF_TFL_GammaBox_EQEmeasurement,
     peroTF_TFL_GammaBox_JVmeasurement,
+    peroTF_Tandem_JVmeasurement,
 )
 
 """
@@ -58,6 +59,11 @@ class PeroTFParser(MatchingParser):
             entry.eqe_data = [sc_eqe]
         if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'jvg':
             entry = peroTF_TFL_GammaBox_JVmeasurement()
+        if mainfile_split[-1] == 'txt' and mainfile_split[-2] == 'jvt':
+            if "fwd" in mainfile:
+                entry = peroTF_Tandem_JVmeasurement()
+            #if "rev" in mainfile:
+            #    entry.data_file_reverse = mainfile
         if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'mpp':
             entry = peroTF_CR_SolSimBox_MPPTracking()
 
