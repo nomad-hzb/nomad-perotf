@@ -316,7 +316,8 @@ class peroTF_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -338,7 +339,8 @@ class peroTF_CR_SpinBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -363,7 +365,8 @@ class peroTF_CR_ChemistryBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -388,7 +391,8 @@ class peroTF_CR_MixBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -413,7 +417,8 @@ class peroTF_CR_OmegaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -438,7 +443,8 @@ class peroTF_TFL_AlphaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -463,7 +469,8 @@ class peroTF_CR_BetaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe', 'datetime',
+                    'recipe',
+                    'datetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -1027,7 +1034,7 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
         a_plot=[
             {
                 'x': 'time',
-                'y': ['power', 'voltage'],
+                'y': ['power_density', 'voltage'],
                 'layout': {
                     'showlegend': True,
                     'yaxis': {'fixedrange': False},
