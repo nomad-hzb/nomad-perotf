@@ -19,23 +19,49 @@
 import datetime
 import os
 
-from baseclasses.helper.utilities import create_archive, set_sample_reference
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+    set_sample_reference,
+)
 from nomad.datamodel import EntryArchive
+from nomad.datamodel.data import (
+    EntryData,
+)
+from nomad.datamodel.metainfo.annotations import (
+    ELNAnnotation,
+)
+from nomad.datamodel.metainfo.basesections import (
+    Entity,
+)
 from nomad.datamodel.metainfo.eln import SolarCellEQE
+from nomad.metainfo import (
+    Quantity,
+)
 from nomad.parsing import MatchingParser
 
 from nomad_perotf.schema_packages.perotf_package import (
     peroTF_CR_SolSimBox_JVmeasurement,
     peroTF_CR_SolSimBox_MPPTracking,
     peroTF_Measurement,
+    peroTF_Tandem_JVmeasurement,
     peroTF_TFL_GammaBox_EQEmeasurement,
     peroTF_TFL_GammaBox_JVmeasurement,
-    peroTF_Tandem_JVmeasurement,
 )
 
 """
 This is a hello world style example for an example parser/converter.
 """
+
+
+class RawFileperoTF(EntryData):
+    processed_archive = Quantity(
+        type=Entity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
 
 
 class PeroTFParser(MatchingParser):
@@ -60,14 +86,17 @@ class PeroTFParser(MatchingParser):
         if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'jvg':
             entry = peroTF_TFL_GammaBox_JVmeasurement()
         if mainfile_split[-1] == 'txt' and mainfile_split[-2] == 'jvt':
-            if "fwd" in mainfile:
+            if 'fwd' in mainfile:
                 entry = peroTF_Tandem_JVmeasurement()
-            #if "rev" in mainfile:
-            #    entry.data_file_reverse = mainfile
-        if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'mpp':
+            else:
+                return
+        if mainfile_split[-1] in ['csv', 'txt'] and mainfile_split[-2] == 'mpp':
             entry = peroTF_CR_SolSimBox_MPPTracking()
 
-        if mainfile_split[-2] in ['jv', 'eqe', 'jvg'] and len(mainfile_split) > 2:
+        if (
+            mainfile_split[-2] in ['jv', 'eqe', 'jvg', 'jvt']
+            and len(mainfile_split) > 2
+        ):
             if 'top' in mainfile_split[1]:
                 entry.multijunction_position = 'top'
             if 'mid' in mainfile_split[1]:
@@ -86,4 +115,8 @@ class PeroTFParser(MatchingParser):
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
+        eid = get_entry_id_from_file_name(file_name, archive)
+        archive.data = RawFileperoTF(
+            processed_archive=get_reference(archive.metadata.upload_id, eid)
+        )
         create_archive(entry, archive, file_name)

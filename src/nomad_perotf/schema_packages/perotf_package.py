@@ -1,4 +1,6 @@
 # from nomad.units import ureg
+import datetime
+
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
 from baseclasses.chemical import Chemical
@@ -314,7 +316,7 @@ class peroTF_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -336,7 +338,7 @@ class peroTF_CR_SpinBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -361,7 +363,7 @@ class peroTF_CR_ChemistryBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -386,7 +388,7 @@ class peroTF_CR_MixBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -411,7 +413,7 @@ class peroTF_CR_OmegaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -436,7 +438,7 @@ class peroTF_TFL_AlphaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -461,7 +463,7 @@ class peroTF_CR_BetaBox_SpinCoating(SpinCoating, EntryData):
                 order=[
                     'name',
                     'present',
-                    'recipe' 'datetime',
+                    'recipedatetime',
                     'previous_process',
                     'batch',
                     'samples',
@@ -980,7 +982,10 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file, 'rt', encoding=encoding
             ) as f:
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                    get_jv_data,
+                )
 
                 jv_dict = get_jv_data(f.read())
                 try:
@@ -1022,7 +1027,7 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
         a_plot=[
             {
                 'x': 'time',
-                'y': ['efficiency', 'voltage'],
+                'y': ['power', 'voltage'],
                 'layout': {
                     'showlegend': True,
                     'yaxis': {'fixedrange': False},
@@ -1042,13 +1047,13 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
             with archive.m_context.raw_file(
                 self.data_file, 'rt', encoding=encoding
             ) as f:
-                from baseclasses.helper.file_parser.KIT_mpp_parser import (
+                from nomad_perotf.schema_packages.parsers.KIT_mpp_parser import (
                     get_mpp_archive,
                     get_mpp_data,
                 )
 
-                mpp_dict, data = get_mpp_data(f.read())
-                get_mpp_archive(mpp_dict, data, self)
+                mpp_dict, data, file_type = get_mpp_data(f.read())
+                get_mpp_archive(mpp_dict, file_type, data, self)
         super().normalize(archive, logger)
 
 
@@ -1116,7 +1121,10 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file, 'tr', encoding=encoding
             ) as f:
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                    get_jv_data,
+                )
 
                 jv_dict = get_jv_data(f.read())
                 try:
@@ -1138,18 +1146,6 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 get_jv_archive(jv_dict, self.data_file, self)
 
         super().normalize(archive, logger)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class peroTF_Tandem_JVmeasurement(JVMeasurement, EntryData):
@@ -1208,143 +1204,65 @@ class peroTF_Tandem_JVmeasurement(JVMeasurement, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
 
+    def map_jv_measurement(self, file, archive, logger):
+        from baseclasses.helper.utilities import get_encoding
+
+        with archive.m_context.raw_file(file, 'br') as f:
+            encoding = get_encoding(f)
+
+        with archive.m_context.raw_file(file, 'tr', encoding=encoding) as f:
+            from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                get_jv_data,
+            )
+
+            jv_dict = get_jv_data(f.read())
+            try:
+                self.datetime = convert_datetime(
+                    file[-23:-8],
+                    datetime_format='%Y%m%dT%H%M%S',
+                    utc=False,
+                )
+            except Exception:
+                logger.warning('Couldnt parse datetime')
+            return jv_dict
 
     def normalize(self, archive, logger):
         super(JVMeasurement, self).normalize(archive, logger)
         self.method = 'JV Measurement'
+        if not self.data_file_reverse and self.data_file:
+            test_string = self.data_file.replace('fwd', 'rev')[:-21]
+            fwd_time = datetime.datetime.strptime(
+                self.data_file[-23:-8], '%Y%m%dT%H%M%S'
+            )
+            for file in archive.m_context.upload_files.raw_directory_list():
+                if not file.path.startswith(test_string) or not file.path.endswith(
+                    'jvt.txt'
+                ):
+                    continue
+                rew_time = datetime.datetime.strptime(
+                    file.path[-23:-8], '%Y%m%dT%H%M%S'
+                )
 
-        if self.data_file:
-            from baseclasses.helper.utilities import get_encoding
+                if (
+                    datetime.timedelta(seconds=1)
+                    < rew_time - fwd_time
+                    < datetime.timedelta(minutes=1)
+                ):
+                    self.data_file_reverse = file.path
 
-            with archive.m_context.raw_file(self.data_file, 'br') as f:
-                encoding = get_encoding(f)
+        if self.data_file and self.data_file_reverse:
+            jv_dict = self.map_jv_measurement(self.data_file, archive, logger)
+            jv_dict_ref = self.map_jv_measurement(
+                self.data_file_reverse, archive, logger
+            )
+            from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
 
-            with archive.m_context.raw_file(
-                self.data_file, 'tr', encoding=encoding
-            ) as f:
-                from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
-
-                jv_dict = get_jv_data(f.read())
-                try:
-                    self.datetime = convert_datetime(
-                        jv_dict['datetime'],
-                        datetime_format='%Y-%m-%d %H:%M:%S %p',
-                        utc=False,
-                    )
-
-                except Exception:
-                    try:
-                        self.datetime = convert_datetime(
-                            jv_dict['datetime'],
-                            datetime_format='%Y-%m-%d %H:%M:%S',
-                            utc=False,
-                        )
-                    except Exception:
-                        logger.warning('Couldnt parse datetime')
-                get_jv_archive(jv_dict, self.data_file, self)
-
-
-        if not self.data_file_reverse:
-            from baseclasses.helper.utilities import get_encoding
-
-            with archive.m_context.raw_file(self.data_file, 'br') as f:
-                encoding = get_encoding(f)
-
-
-            if "rev" in archive.m_context.raw_file(self.data_file):
-                with archive.m_context.raw_file(
-                    self.data_file, 'tr', encoding=encoding
-                ) as f:
-                    from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                    from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
-
-                    jv_dict = get_jv_data(f.read())
-                    try:
-                        self.datetime = convert_datetime(
-                            jv_dict['datetime'],
-                            datetime_format='%Y-%m-%d %H:%M:%S %p',
-                            utc=False,
-                        )
-
-                    except Exception:
-                        try:
-                            self.datetime = convert_datetime(
-                                jv_dict['datetime'],
-                                datetime_format='%Y-%m-%d %H:%M:%S',
-                                utc=False,
-                            )
-                        except Exception:
-                            logger.warning('Couldnt parse datetime')
-                    get_jv_archive(jv_dict, self.data_file, self)
-
-
-
+            jv_dict['jv_curve'][0]['name'] = 'Forward Scan'
+            jv_dict_ref['jv_curve'][0]['name'] = 'Reverse Scan'
+            get_jv_archive(jv_dict, self.data_file, self)
+            get_jv_archive(jv_dict_ref, self.data_file_reverse, self, append=True)
 
         super().normalize(archive, logger)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
