@@ -21,7 +21,7 @@ perotf_parser = PeroTFParserEntryPoint(
     name='PeroTFParser',
     description='Parser for peroTF files',
     alias='perotf_parser',
-    mainfile_name_re=r'^(.+\.?.+\.((eqe|jv|jv|mpp|pero)\..{1,4}))$',
+    mainfile_name_re=r'^(.+\.?.+\.((eqe|jv|mpp|pero)\..{1,4}))$',
     mainfile_mime_re='(application|text|image)/.*',
 )
 
