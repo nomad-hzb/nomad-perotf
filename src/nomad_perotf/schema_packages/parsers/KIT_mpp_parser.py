@@ -138,7 +138,7 @@ def get_mpp_archive(header_dict, file_type, df, mpp_entitiy, mainfile=None):
         mpp_entitiy.properties = properties
 
 
-with open(
-    '/home/a2853/Downloads/UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt'
-) as f:
-    get_mpp_data(f.read())
+# with open(
+#     '/home/a2853/Downloads/UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt'
+# ) as f:
+#     get_mpp_data(f.read())

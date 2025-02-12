@@ -338,4 +338,6 @@ def get_jv_data(filedata):
         jv_dict['Fill_factor'] = list([ff[0]])
         jv_dict['Efficiency'] = list([pce[0]])
 
+    jv_dict['file_type'] = file_type
+
     return jv_dict

@@ -33,7 +33,7 @@ from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
 )
 from nomad.datamodel.metainfo.basesections import (
-    Entity,
+    Activity,
 )
 from nomad.datamodel.metainfo.eln import SolarCellEQE
 from nomad.metainfo import (
@@ -42,12 +42,10 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_perotf.schema_packages.perotf_package import (
-    peroTF_CR_SolSimBox_JVmeasurement,
-    peroTF_CR_SolSimBox_MPPTracking,
+    peroTF_JVmeasurement,
     peroTF_Measurement,
-    peroTF_Tandem_JVmeasurement,
+    peroTF_MPPTracking,
     peroTF_TFL_GammaBox_EQEmeasurement,
-    peroTF_TFL_GammaBox_JVmeasurement,
 )
 
 """
@@ -57,7 +55,7 @@ This is a hello world style example for an example parser/converter.
 
 class RawFileperoTF(EntryData):
     processed_archive = Quantity(
-        type=Entity,
+        type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
         ),
@@ -69,13 +67,15 @@ class PeroTFParser(MatchingParser):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
 
         mainfile_split = os.path.basename(mainfile).split('.')
-        print(mainfile_split)
+        archive.data = RawFileperoTF()
         notes = ''
         if len(mainfile_split) > 2:
             notes = mainfile_split[1]
         entry = peroTF_Measurement()
-        if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'jv':
-            entry = peroTF_CR_SolSimBox_JVmeasurement()
+        if mainfile_split[-2] == 'jv':
+            if 'rev' in mainfile:
+                return
+            entry = peroTF_JVmeasurement()
         if mainfile_split[-1] == 'dat' and mainfile_split[-2] == 'eqe':
             header_lines = 63
             sc_eqe = SolarCellEQE()
@@ -83,15 +83,8 @@ class PeroTFParser(MatchingParser):
             sc_eqe.header_lines = header_lines
             entry = peroTF_TFL_GammaBox_EQEmeasurement()
             entry.eqe_data = [sc_eqe]
-        if mainfile_split[-1] == 'csv' and mainfile_split[-2] == 'jvg':
-            entry = peroTF_TFL_GammaBox_JVmeasurement()
-        if mainfile_split[-1] == 'txt' and mainfile_split[-2] == 'jvt':
-            if 'fwd' in mainfile:
-                entry = peroTF_Tandem_JVmeasurement()
-            else:
-                return
         if mainfile_split[-1] in ['csv', 'txt'] and mainfile_split[-2] == 'mpp':
-            entry = peroTF_CR_SolSimBox_MPPTracking()
+            entry = peroTF_MPPTracking()
 
         if (
             mainfile_split[-2] in ['jv', 'eqe', 'jvg', 'jvt']
