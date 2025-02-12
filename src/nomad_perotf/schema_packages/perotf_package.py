@@ -976,7 +976,41 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
     )
 
     def normalize(self, archive, logger):
+        super(JVMeasurement, self).normalize(archive, logger)
         self.method = 'JV Measurement'
+
+        if self.data_file:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(
+                self.data_file, 'rt', encoding=encoding
+            ) as f:
+                from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                jv_dict = get_jv_data(f.read())
+                try:
+                    self.datetime = convert_datetime(
+                        jv_dict['datetime'],
+                        datetime_format='%Y-%m-%d %H:%M:%S %p',
+                        utc=False,
+                    )
+
+                except Exception:
+                    try:
+                        self.datetime = convert_datetime(
+                            jv_dict['datetime'],
+                            datetime_format='%Y-%m-%d %H:%M:%S',
+                            utc=False,
+                        )
+                    except Exception:
+                        logger.warning('Couldnt parse datetime')
+
+                get_jv_archive(jv_dict, self.data_file, self)
+
         super().normalize(archive, logger)
 
 
@@ -1065,6 +1099,22 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
     )
 
     def normalize(self, archive, logger):
+        if self.data_file:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(
+                self.data_file, 'rt', encoding=encoding
+            ) as f:
+                from baseclasses.helper.file_parser.KIT_mpp_parser import (
+                    get_mpp_archive,
+                    get_mpp_data,
+                )
+
+                mpp_dict, data = get_mpp_data(f.read())
+                get_mpp_archive(mpp_dict, data, self)
         super().normalize(archive, logger)
 
 
@@ -1119,7 +1169,40 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
     )
 
     def normalize(self, archive, logger):
+        super(JVMeasurement, self).normalize(archive, logger)
         self.method = 'JV Measurement'
+
+        if self.data_file:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(
+                self.data_file, 'tr', encoding=encoding
+            ) as f:
+                from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                jv_dict = get_jv_data(f.read())
+                try:
+                    self.datetime = convert_datetime(
+                        jv_dict['datetime'],
+                        datetime_format='%Y-%m-%d %H:%M:%S %p',
+                        utc=False,
+                    )
+
+                except Exception:
+                    try:
+                        self.datetime = convert_datetime(
+                            jv_dict['datetime'],
+                            datetime_format='%Y-%m-%d %H:%M:%S',
+                            utc=False,
+                        )
+                    except Exception:
+                        logger.warning('Couldnt parse datetime')
+                get_jv_archive(jv_dict, self.data_file, self)
+
         super().normalize(archive, logger)
 
 
