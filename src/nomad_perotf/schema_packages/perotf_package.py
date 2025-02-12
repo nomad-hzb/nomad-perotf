@@ -1355,9 +1355,12 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                     'jv.txt'
                 ):
                     continue
-                rew_time = datetime.datetime.strptime(
-                    file.path.split('.')[-3][-15:], '%Y%m%dT%H%M%S'
-                )
+                try:
+                    rew_time = datetime.datetime.strptime(
+                        file.path.split('.')[-3][-15:], '%Y%m%dT%H%M%S'
+                    )
+                except Exception:
+                    continue
 
                 if (
                     datetime.timedelta(seconds=1)
