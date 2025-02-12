@@ -1351,7 +1351,9 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file.split('.')[-3][-15:], '%Y%m%dT%H%M%S'
             )
             for file in archive.m_context.upload_files.raw_directory_list():
-                if not file.path.startswith(test_string):
+                if not file.path.startswith(test_string) and file.path.endswith(
+                    'jv.txt'
+                ):
                     continue
                 rew_time = datetime.datetime.strptime(
                     file.path.split('.')[-3][-15:], '%Y%m%dT%H%M%S'
