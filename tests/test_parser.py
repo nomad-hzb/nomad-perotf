@@ -43,6 +43,7 @@ def get_archive(file_base, monkeypatch):
         'UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt',
         'UserGivenName_pX1_fwd_lt_lp0_20250109T164058.jv.txt',
         'UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt',
+        'AA00_C3_20.47mAcm-2.eqe.dat',
     ]
 )
 def parsed_archive(request, monkeypatch):

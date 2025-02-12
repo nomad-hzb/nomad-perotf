@@ -5,7 +5,11 @@ from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
 from baseclasses.chemical import Chemical
 from baseclasses.experimental_plan import ExperimentalPlan
-from baseclasses.helper.utilities import convert_datetime, get_encoding
+from baseclasses.helper.utilities import (
+    convert_datetime,
+    get_encoding,
+    set_sample_reference,
+)
 from baseclasses.material_processes_misc import (
     Annealing,
     Cleaning,
@@ -1051,6 +1055,10 @@ class peroTF_MPPTracking(MPPTracking, EntryData):
     )
 
     def normalize(self, archive, logger):
+        if not self.samples and self.data_file:
+            search_id = self.data_file.split('.')[0]
+            set_sample_reference(archive, self, search_id)
+
         if self.data_file:
             from baseclasses.helper.utilities import get_encoding
 
@@ -1310,6 +1318,10 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
         super(JVMeasurement, self).normalize(archive, logger)
         self.method = 'JV Measurement'
         from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
+
+        if not self.samples and self.data_file:
+            search_id = self.data_file.split('.')[0]
+            set_sample_reference(archive, self, search_id)
 
         if self.data_file:
             from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
