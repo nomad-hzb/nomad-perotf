@@ -993,7 +993,10 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file, 'rt', encoding=encoding
             ) as f:
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                    get_jv_data,
+                )
 
                 jv_dict = get_jv_data(f.read())
                 try:
@@ -1116,13 +1119,13 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
             with archive.m_context.raw_file(
                 self.data_file, 'rt', encoding=encoding
             ) as f:
-                from baseclasses.helper.file_parser.KIT_mpp_parser import (
+                from nomad_perotf.schema_packages.parsers.KIT_mpp_parser import (
                     get_mpp_archive,
                     get_mpp_data,
                 )
 
-                mpp_dict, data = get_mpp_data(f.read())
-                get_mpp_archive(mpp_dict, data, self)
+                mpp_dict, data, file_type = get_mpp_data(f.read())
+                get_mpp_archive(mpp_dict, file_type, data, self)
         super().normalize(archive, logger)
 
 
@@ -1190,7 +1193,10 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file, 'tr', encoding=encoding
             ) as f:
                 from baseclasses.helper.archive_builder.jv_archive import get_jv_archive
-                from baseclasses.helper.file_parser.KIT_jv_parser import get_jv_data
+
+                from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                    get_jv_data,
+                )
 
                 jv_dict = get_jv_data(f.read())
                 try:
