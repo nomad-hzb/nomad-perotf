@@ -1,5 +1,6 @@
 import os
 
+import nomad
 import pytest
 from nomad.client import normalize_all, parse
 
@@ -8,6 +9,19 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_CR_SolSimBox_MPPTracking,
     peroTF_TFL_GammaBox_JVmeasurement,
 )
+
+
+class A:
+    def __init__(self):
+        pass
+
+    def raw_directory_list(self):
+        return [F(p) for p in os.listdir(os.path.join('tests', 'data'))]
+
+
+class F:
+    def __init__(self, path):
+        self.path = path
 
 
 def set_monkey_patch(monkeypatch):
@@ -22,6 +36,12 @@ def set_monkey_patch(monkeypatch):
     monkeypatch.setattr(
         'nomad_perotf.schema_packages.perotf_package.set_sample_reference',
         mockreturn_search,
+    )
+
+    monkeypatch.setattr(
+        nomad.datamodel.ServerContext,
+        'upload_files',
+        A(),
     )
 
 
@@ -95,6 +115,19 @@ def test_jv_files(monkeypatch):
     assert archive.data
     assert archive.metadata.entry_type == 'peroTF_TFL_GammaBox_JVmeasurement'
 
+    delete_json()
+
+
+def test_jv_files_2(monkeypatch):
+    file = 'UserGivenName_pX1_fwd_lt_lp0_20250109T164058.jv.txt'
+    archive = get_archive(file, monkeypatch)
+    c_context = archive.m_context
+    archive.m_context = nomad.datamodel.ServerContext()
+    archive.m_context.raw_file = c_context.raw_file
+    normalize_all(archive)
+
+    assert archive.data
+    assert len(archive.data.jv_curve) == 2
     delete_json()
 
 
