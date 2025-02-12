@@ -41,7 +41,7 @@ def get_archive(file_base, monkeypatch):
         '20250114_experiment_file.xlsx',
         'KIT_DaBa_20230202_Batch-1_0_7.px7_mid.jv.csv',
         'UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt',
-        'UserGivenName_pX1_fwd_lt_lp0_20250109T164058.jvt.txt',
+        'UserGivenName_pX1_fwd_lt_lp0_20250109T164058.jv.txt',
         'UserGivenName_pX1_MPPT_lt_lp0_20250109T171021.mpp.txt',
     ]
 )
