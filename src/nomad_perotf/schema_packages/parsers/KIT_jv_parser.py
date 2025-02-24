@@ -32,7 +32,8 @@ def calculatePVparametersFromJV(
 
     ind_mpp = (np.argmax(p[0]), np.argmax(p[1]))
 
-    mpp = ((v[ind_mpp[0]], j[0][ind_mpp[0]]), (v[ind_mpp[1]], j[1][ind_mpp[1]]))
+    mpp = ((v[ind_mpp[0]], j[0][ind_mpp[0]]), 
+           (v[ind_mpp[1]], j[1][ind_mpp[1]]))
 
     f0 = interpolate.interp1d(v, j[0])
     f1 = interpolate.interp1d(v, j[1])
@@ -90,10 +91,12 @@ def calculatePVparametersFromJV(
             p_quadrant_0=v_quadrant_0*j_quadrant_0
             p_quadrant_1=v_quadrant_1*j_quadrant_1
             
-            ind_mpp = (np.argmax(np.abs(p_quadrant_0)), np.argmax(np.abs(p_quadrant_1)))
+            ind_mpp = (np.argmax(np.abs(p_quadrant_0)), 
+                       np.argmax(np.abs(p_quadrant_1)))
 
        
-            mpp = ((v_quadrant_0[ind_mpp[0]], j_quadrant_0[ind_mpp[0]]), (v_quadrant_1[ind_mpp[1]], j_quadrant_1[ind_mpp[1]]))
+            mpp = ((v_quadrant_0[ind_mpp[0]], j_quadrant_0[ind_mpp[0]]), 
+                   (v_quadrant_1[ind_mpp[1]], j_quadrant_1[ind_mpp[1]]))
             
         
             voc = np.abs(voc)
@@ -407,7 +410,6 @@ def get_jv_data(filedata):
 
 
 
-    plt.plot(jv_dict['jv_curve'][0]['voltage'], jv_dict['jv_curve'][0]['current_density'])
-    
+
     
     return jv_dict
