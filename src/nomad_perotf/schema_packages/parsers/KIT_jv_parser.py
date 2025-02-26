@@ -1,4 +1,3 @@
-# import glob
 from io import StringIO
 
 import numpy as np
@@ -13,16 +12,15 @@ def identify_file_type(file_content):
     """
     if 'Singapore Solar Simulator, Python' in file_content:
         return 'python'
+
     return 'labview'
 
 
-def calculatePVparametersFromJV(
-    jvData, savename, printing, enablePlot, cellArea=0.105, lineFittingDataPoints=20
-):
-    digitsPCE = 1
-    digitsJSC = 1
+def calculatePVparametersFromJV(jvData, cellArea=0.105, lineFittingDataPoints=20):
+    digitsPCE = 2
+    digitsJSC = 2
     digitsVOC = 5
-    digitsFF = 1
+    digitsFF = 2
     digitsRS = 0
     digitsRSHUNT = 0
 
@@ -80,7 +78,32 @@ def calculatePVparametersFromJV(
                 np.round((mpp[1][0] * mpp[1][1]) / (voc[1] * jsc[1]) * 100, digitsFF),
             )
         else:
-            ff = (0, 0)
+            # ff = (0,0)
+
+            v_quadrant_0 = v_new[jsc_ind[0] : voc_ind[0]]
+            j_quadrant_0 = j_interpolated[0][jsc_ind[0] : voc_ind[0]]
+
+            v_quadrant_1 = v_new[jsc_ind[1] : voc_ind[1]]
+            j_quadrant_1 = j_interpolated[1][jsc_ind[1] : voc_ind[1]]
+
+            p_quadrant_0 = v_quadrant_0 * j_quadrant_0
+            p_quadrant_1 = v_quadrant_1 * j_quadrant_1
+
+            ind_mpp = (np.argmax(np.abs(p_quadrant_0)), np.argmax(np.abs(p_quadrant_1)))
+
+            mpp = (
+                (v_quadrant_0[ind_mpp[0]], j_quadrant_0[ind_mpp[0]]),
+                (v_quadrant_1[ind_mpp[1]], j_quadrant_1[ind_mpp[1]]),
+            )
+
+            voc = np.abs(voc)
+            jsc = np.abs(jsc)
+            mpp = np.abs(mpp)
+
+            ff = (
+                np.round((mpp[0][0] * mpp[0][1]) / (voc[0] * jsc[0]) * 100, digitsFF),
+                np.round((mpp[1][0] * mpp[1][1]) / (voc[1] * jsc[1]) * 100, digitsFF),
+            )
 
         pce = (
             np.round(voc[0] * jsc[0] * ff[0] / 100, digitsPCE),
@@ -232,17 +255,31 @@ def get_jv_data(filedata):
 
         df_curves = df_curves.dropna(how='all', axis=1)
 
-        if df_curves.iloc[0, 0] < 0:
-            # df_curves = df_curves*-1
-            j_columns = ['Voltage [V]']
-            df_curves[j_columns] = df_curves[j_columns] * -1
-        else:
+        voc_help = df_curves.iloc[:, 0][
+            np.where(np.diff(np.signbit(df_curves.iloc[:, 1])))[0].item()
+        ]
+        jsc_help = df_curves.iloc[:, 1][
+            np.where(np.diff(np.signbit(df_curves.iloc[:, 0])))[0].item()
+        ]
+
+        if voc_help < 0:
+            #     voltage = -voltage
+            df_curves['Voltage [V]'] = df_curves['Voltage [V]'] * -1
+
+        if jsc_help < 0:
+            #     current = -current
             j_columns = [
                 'Current density [1] [mA/cm^2]',
                 'Current density [2] [mA/cm^2]',
                 'Average current density [mA/cm^2]',
             ]
             df_curves[j_columns] = df_curves[j_columns] * -1
+
+        if (
+            df_curves['Voltage [V]'][0]
+            > df_curves['Voltage [V]'][len(df_curves['Voltage [V]']) - 1]
+        ):
+            df_curves = df_curves.iloc[::-1].reset_index(drop=True)
 
         jv_dict['jv_curve'] = []
         for column in range(1, len(df_curves.columns) - 1):
@@ -256,9 +293,6 @@ def get_jv_data(filedata):
 
         pce, voc, jsc, ff, RSHUNT, RS, mpp = calculatePVparametersFromJV(
             np.array(df_curves),
-            '',
-            printing=False,
-            enablePlot=True,
             cellArea=jv_dict['active_area'],
             lineFittingDataPoints=20,
         )
@@ -299,12 +333,30 @@ def get_jv_data(filedata):
 
         df_curves = df_curves.dropna(how='all', axis=1)
 
-        j_columns = [
-            'CurrentDensity',
-            'Current',
+        voc_help = df_curves.iloc[:, 0][
+            np.where(np.diff(np.signbit(df_curves.iloc[:, 1])))[0].item()
+        ]
+        jsc_help = df_curves.iloc[:, 1][
+            np.where(np.diff(np.signbit(df_curves.iloc[:, 0])))[0].item()
         ]
 
-        df_curves[j_columns] = df_curves[j_columns] * -1
+        if voc_help < 0:
+            #     voltage = -voltage
+            df_curves['Voltage'] = df_curves['Voltage'] * -1
+
+        if jsc_help < 0:
+            #     current = -current
+            j_columns = [
+                'CurrentDensity',
+                'Current',
+            ]
+            df_curves[j_columns] = df_curves[j_columns] * -1
+
+        if (
+            df_curves['Voltage'][0]
+            > df_curves['Voltage'][len(df_curves['Voltage']) - 1]
+        ):
+            df_curves = df_curves.iloc[::-1].reset_index(drop=True)
 
         df_curves['Current'] = df_curves['CurrentDensity'].copy()
 
@@ -320,9 +372,6 @@ def get_jv_data(filedata):
 
         pce, voc, jsc, ff, RSHUNT, RS, mpp = calculatePVparametersFromJV(
             np.array(df_curves),
-            '',
-            printing=False,
-            enablePlot=True,
             cellArea=jv_dict['active_area'],
             lineFittingDataPoints=20,
         )
@@ -337,7 +386,5 @@ def get_jv_data(filedata):
         jv_dict['V_oc'] = list([voc[0]])
         jv_dict['Fill_factor'] = list([ff[0]])
         jv_dict['Efficiency'] = list([pce[0]])
-
-    jv_dict['file_type'] = file_type
 
     return jv_dict
