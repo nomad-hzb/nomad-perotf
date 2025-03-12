@@ -17,10 +17,10 @@ def identify_file_type(file_content):
 
 
 def calculatePVparametersFromJV(jvData, cellArea=0.105, lineFittingDataPoints=20):
-    digitsPCE = 2
-    digitsJSC = 2
-    digitsVOC = 5
-    digitsFF = 2
+    digitsPCE = 4
+    digitsJSC = 4
+    digitsVOC = 6
+    digitsFF = 4
     digitsRS = 0
     digitsRSHUNT = 0
 
