@@ -19,7 +19,7 @@ from baseclasses.material_processes_misc import (
 )
 from baseclasses.solar_energy import (
     # PLMeasurement,
-    # UVvisMeasurement,
+    UVvisMeasurement,
     EQEMeasurement,
     # TimeResolvedPhotoluminescence,
     JVMeasurement,
@@ -1219,7 +1219,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
 
         super().normalize(archive, logger)
 
-class peroTF_UVVisMeasurement(UVVisMeasurement, EntryData):
+class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
     pass
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
