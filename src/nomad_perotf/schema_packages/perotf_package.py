@@ -1219,7 +1219,8 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
 
         super().normalize(archive, logger)
 
-
+class peroTF_UVVisMeasurement(UVVisMeasurement, EntryData):
+    pass
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
