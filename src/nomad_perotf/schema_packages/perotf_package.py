@@ -1220,7 +1220,102 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
         super().normalize(archive, logger)
 
 class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
-    pass
+
+    m_def = Section(
+        a_eln=dict( #i guess that wont change?
+            hide=[ 
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'certified_values',
+                'certification_institute',
+            ],
+            properties=dict( #what is this actually doing?
+                order=[ 
+                    'name',
+                    'data_file',
+                    'active_area',
+                    'intensity',
+                    'integration_time',
+                    'settling_time',
+                    'averaging',
+                    'compliance',
+                    'samples',
+                ]
+            ),
+        ),
+        a_plot=[ #are two y axis also available? --> transmission and reflection instead of absorption 
+            {
+                'x': 'jv_curve/:/wavelength (nm)',
+                'y': 'jv_curve/:/absorption',
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+            }
+        ],
+    )
+
+    #not important and can be deleted?
+    '''
+    multijunction_position = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(suggestions=['top', 'mid', 'bottom']),
+        ),
+    )
+    '''
+
+    def normalize(self, archive, logger):
+        super(UVvisMeasurement, self).normalize(archive, logger)
+        self.method = 'UVvis Measurement'
+
+        if self.data_file:
+            from baseclasses.helper.utilities import get_encoding
+
+            with archive.m_context.raw_file(self.data_file, 'br') as f:
+                encoding = get_encoding(f)
+
+            with archive.m_context.raw_file(
+                self.data_file, 'tr', encoding=encoding
+            ) as f:
+                from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+
+                from nomad_perotf.schema_packages.parsers.KIT_uvvis_parser import (
+                    get_UVvis_data,
+                )
+
+                uvvis_dict = get_UVvis_data(f.read())
+                
+                #whats up with the time??
+                try:
+                    self.datetime = convert_datetime(
+                        uvvis_dict['datetime'],
+                        datetime_format='%Y-%m-%d %H:%M:%S %p',
+                        utc=False,
+                    )
+
+                except Exception:
+                    try:
+                        self.datetime = convert_datetime(
+                            uvvis_dict['datetime'],
+                            datetime_format='%Y-%m-%d %H:%M:%S',
+                            utc=False,
+                        )
+                    except Exception:
+                        logger.warning('Couldnt parse datetime')
+                get_uvvis_archive(UVvis_dict, self.data_file, self)
+
+        super().normalize(archive, logger)
+
+    
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
