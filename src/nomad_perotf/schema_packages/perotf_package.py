@@ -1250,8 +1250,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
         ),
         a_plot=[ #are two y axis also available? --> transmission and reflection instead of absorption 
             {
-                'x': 'uvvis_curve/:/wavelength',
-                'y': 'uvvis_curve/:/intensity',
+                'x': 'measurements/:/wavelength',
+                'y': 'measurements/:/intensity',
                 'layout': {
                     'showlegend': True,
                     'yaxis': {'fixedrange': False},
@@ -1261,32 +1261,21 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
         ],
     )
 
+    
+
     #not important and can be deleted?
-    '''
-    multijunction_position = Quantity(
-        type=str,
-        shape=[],
-        a_eln=dict(
-            component='EnumEditQuantity',
-            props=dict(suggestions=['top', 'mid', 'bottom']),
-        ),
+    
+    wavelength = Quantity(
+        type=float,
+        shape=['*'],
     )
-    '''
-    '''
-    def map_uvvis_measurement(self, file, archive, logger):
-        with archive.m_context.raw_file(file, 'br') as f:
-            encoding = get_encoding(f)
-
-        with archive.m_context.raw_file(file, 'tr', encoding=encoding) as f:
-            from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
-                get_uvvis_data,
-            )
-
-            uvvis_dict = get_uvvis_data(f.read())
-            
-            return uvvis_dict
-    '''
-
+    intensity = Quantity(
+        type=float,
+        shape=['*'],
+    )
+   
+    
+    
     def normalize(self, archive, logger):
         super(UVvisMeasurement, self).normalize(archive, logger)
         self.method = 'UVvis Measurement'
@@ -1303,10 +1292,10 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
 
                 from nomad_perotf.schema_packages.parsers.KIT_uvvis_parser import (
-                    get_UVvis_data,
+                    get_uvvis_data,
                 )
 
-                uvvis_dict = get_uvvis_archive(f.read())
+                uvvis_dict = get_uvvis_data(f.read())
                 
                 
                 '''
@@ -1361,6 +1350,7 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                 ]
             ),
         ),
+
         a_plot=[
             {
                 'x': 'jv_curve/:/voltage',

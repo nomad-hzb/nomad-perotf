@@ -45,6 +45,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_JVmeasurement,
     peroTF_Measurement,
     peroTF_MPPTracking,
+    peroTF_UVvisMeasurement,
     peroTF_TFL_GammaBox_EQEmeasurement,
 )
 
@@ -85,7 +86,8 @@ class PeroTFParser(MatchingParser):
             entry.eqe_data = [sc_eqe]
         if mainfile_split[-1] in ['csv', 'txt'] and mainfile_split[-2] == 'mpp':
             entry = peroTF_MPPTracking()
-
+        if mainfile_split[-1] in ['csv'] and mainfile_split[-2] == 'uvvis':
+            entry = peroTF_UVvisMeasurement()
         if (
             mainfile_split[-2] in ['jv', 'eqe', 'jvg', 'jvt']
             and len(mainfile_split) > 2
@@ -103,9 +105,13 @@ class PeroTFParser(MatchingParser):
 
         entry.name = f'{search_id} {notes}'
         entry.description = f'Notes from file name: {notes}'
-        if not mainfile_split[-2] == 'eqe':
-            entry.data_file = os.path.basename(mainfile)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        if not mainfile_split[-2] == 'eqe' and not mainfile_split[-2] == 'uvvis':
+            entry.data_file = os.path.basename(mainfile)
+        elif mainfile_split[-2] == 'uvvis':
+            entry.eqe_data_file = [os.path.basename(mainfile)]
+            entry.datetime = None
+        
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         eid = get_entry_id_from_file_name(file_name, archive)
