@@ -1250,8 +1250,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
         ),
         a_plot=[ #are two y axis also available? --> transmission and reflection instead of absorption 
             {
-                'x': 'jv_curve/:/wavelength (nm)',
-                'y': 'jv_curve/:/absorption',
+                'x': 'uvvis_curve/:/wavelength',
+                'y': 'uvvis_curve/:/intensity',
                 'layout': {
                     'showlegend': True,
                     'yaxis': {'fixedrange': False},
@@ -1271,6 +1271,20 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
             props=dict(suggestions=['top', 'mid', 'bottom']),
         ),
     )
+    '''
+    '''
+    def map_uvvis_measurement(self, file, archive, logger):
+        with archive.m_context.raw_file(file, 'br') as f:
+            encoding = get_encoding(f)
+
+        with archive.m_context.raw_file(file, 'tr', encoding=encoding) as f:
+            from nomad_perotf.schema_packages.parsers.KIT_jv_parser import (
+                get_uvvis_data,
+            )
+
+            uvvis_dict = get_uvvis_data(f.read())
+            
+            return uvvis_dict
     '''
 
     def normalize(self, archive, logger):
@@ -1292,8 +1306,10 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                     get_UVvis_data,
                 )
 
-                uvvis_dict = get_UVvis_data(f.read())
+                uvvis_dict = get_uvvis_archive(f.read())
                 
+                
+                '''
                 #whats up with the time??
                 try:
                     self.datetime = convert_datetime(
@@ -1311,7 +1327,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                         )
                     except Exception:
                         logger.warning('Couldnt parse datetime')
-                get_uvvis_archive(UVvis_dict, self.data_file, self)
+                '''
+                get_uvvis_archive(uvvis_dict, self.data_file, self)
 
         super().normalize(archive, logger)
 
@@ -1464,7 +1481,7 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                     < datetime.timedelta(minutes=1)
                 ):
                     self.data_file_reverse = file.path
-
+                
         if self.data_file:
             jv_dict = self.map_jv_measurement(self.data_file, archive, logger)
             if self.data_file_reverse:
