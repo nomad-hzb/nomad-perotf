@@ -18,8 +18,6 @@ from baseclasses.material_processes_misc import (
     UVCleaning,
 )
 from baseclasses.solar_energy import (
-    # PLMeasurement,
-    UVvisMeasurement,
     EQEMeasurement,
     # TimeResolvedPhotoluminescence,
     JVMeasurement,
@@ -30,6 +28,9 @@ from baseclasses.solar_energy import (
     SolcarCellSample,
     StandardSampleSolarCell,
     Substrate,
+    UVvisData,
+    # PLMeasurement,
+    UVvisMeasurement,
 )
 from baseclasses.solution import Solution
 from baseclasses.vapour_based_deposition import (
@@ -1219,11 +1220,11 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
 
         super().normalize(archive, logger)
 
-class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
 
+class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
     m_def = Section(
-        a_eln=dict( #i guess that wont change?
-            hide=[ 
+        a_eln=dict(  # i guess that wont change?
+            hide=[
                 'lab_id',
                 'users',
                 'location',
@@ -1234,8 +1235,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 'certified_values',
                 'certification_institute',
             ],
-            properties=dict( #what is this actually doing?
-                order=[ 
+            properties=dict(  # what is this actually doing?
+                order=[
                     'name',
                     'data_file',
                     'active_area',
@@ -1248,7 +1249,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[ #are two y axis also available? --> transmission and reflection instead of absorption 
+        a_plot=[
             {
                 'x': 'measurements/:/wavelength',
                 'y': 'measurements/:/intensity',
@@ -1261,44 +1262,28 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
         ],
     )
 
-    
+    # not important and can be deleted?
 
-    #not important and can be deleted?
-    
-    wavelength = Quantity(
-        type=float,
-        shape=['*'],
-    )
-    intensity = Quantity(
-        type=float,
-        shape=['*'],
-    )
-   
-    
-    
     def normalize(self, archive, logger):
-        super(UVvisMeasurement, self).normalize(archive, logger)
         self.method = 'UVvis Measurement'
 
         if self.data_file:
             from baseclasses.helper.utilities import get_encoding
 
-            with archive.m_context.raw_file(self.data_file, 'br') as f:
+            with archive.m_context.raw_file(self.data_file[0], 'br') as f:
                 encoding = get_encoding(f)
 
             with archive.m_context.raw_file(
-                self.data_file, 'tr', encoding=encoding
+                self.data_file[0], 'tr', encoding=encoding
             ) as f:
-                from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
-
                 from nomad_perotf.schema_packages.parsers.KIT_uvvis_parser import (
                     get_uvvis_data,
                 )
 
                 uvvis_dict = get_uvvis_data(f.read())
-                
-                
-                '''
+                print(uvvis_dict)
+
+                """
                 #whats up with the time??
                 try:
                     self.datetime = convert_datetime(
@@ -1316,12 +1301,25 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                         )
                     except Exception:
                         logger.warning('Couldnt parse datetime')
-                '''
-                get_uvvis_archive(uvvis_dict, self.data_file, self)
-
+                """
+                uvvis_data = []
+                for m in [
+                    'reflection',
+                    'transmission',
+                    'absorption',
+                    'smoothed_absorption',
+                ]:
+                    uvvis_data.append(
+                        UVvisData(
+                            name=m,
+                            wavelength=uvvis_dict.get('wavelength'),
+                            intensity=uvvis_dict.get(m),
+                        )
+                    )
+                self.measurements = uvvis_data
         super().normalize(archive, logger)
 
-    
+
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1350,7 +1348,6 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                 ]
             ),
         ),
-
         a_plot=[
             {
                 'x': 'jv_curve/:/voltage',
@@ -1471,7 +1468,7 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                     < datetime.timedelta(minutes=1)
                 ):
                     self.data_file_reverse = file.path
-                
+
         if self.data_file:
             jv_dict = self.map_jv_measurement(self.data_file, archive, logger)
             if self.data_file_reverse:

@@ -45,8 +45,8 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_JVmeasurement,
     peroTF_Measurement,
     peroTF_MPPTracking,
-    peroTF_UVvisMeasurement,
     peroTF_TFL_GammaBox_EQEmeasurement,
+    peroTF_UVvisMeasurement,
 )
 
 """
@@ -109,9 +109,9 @@ class PeroTFParser(MatchingParser):
         if not mainfile_split[-2] == 'eqe' and not mainfile_split[-2] == 'uvvis':
             entry.data_file = os.path.basename(mainfile)
         elif mainfile_split[-2] == 'uvvis':
-            entry.eqe_data_file = [os.path.basename(mainfile)]
+            entry.data_file = [os.path.basename(mainfile)]
+            print(entry.data_file)
             entry.datetime = None
-        
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         eid = get_entry_id_from_file_name(file_name, archive)
