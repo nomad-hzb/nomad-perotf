@@ -94,7 +94,9 @@ pylint.max-statements = 80
 ignore = [
     "F403", # 'from module import *' used; unable to detect undefined names
     "PLR2004",
-    "PLR0913"
+    "PLR0913",
+    "PLC0415"
+
 ] 
 
 fixable = ["ALL"]
