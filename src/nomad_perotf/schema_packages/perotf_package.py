@@ -1307,7 +1307,6 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                     'reflection',
                     'transmission',
                     'absorption',
-                    'smoothed_absorption',
                 ]:
                     uvvis_data.append(
                         UVvisData(

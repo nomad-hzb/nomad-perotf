@@ -67,6 +67,7 @@ def get_uvvis_data(filedata):
 
     df_ = {
         'photonenergy': df['photonenergy'].tolist(),
+        'wavelength': df['wavelength'].tolist(),
         'reflection': df['reflection'],
         'transmission': df['transmission'],
         'absorption': df['absorption'].tolist(),
