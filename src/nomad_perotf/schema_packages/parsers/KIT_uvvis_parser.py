@@ -64,13 +64,18 @@ def get_uvvis_data(filedata):
     )
     derivate_absorption = np.gradient(smoothed_absorption, energy_range)
     result = find_peaks_and_fit_gaussian(energy_range, derivate_absorption)
+    
+    #wavelengtg with same size as smoothed_absorption
+    smoothed_wavelength = 1239.841984 * energy_range
 
     df_ = {
+        'wavelength': df['wavelength'].tolist(),
         'photonenergy': df['photonenergy'].tolist(),
         'reflection': df['reflection'],
         'transmission': df['transmission'],
         'absorption': df['absorption'].tolist(),
         'energy_range': energy_range,
+        'smmoothed_wavelength': smoothed_wavelength,
         'smoothed_absorption': smoothed_absorption,
         'derivate_absorption': derivate_absorption,
         'Eg,popt,f_r': result,
