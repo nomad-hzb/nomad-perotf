@@ -1295,7 +1295,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
 
                 uvvis_dict = get_uvvis_data(f.read())
                 
-                self.bandgaps_uvvis = [peak[0] for peak in uvvis_dict.get('Eg,popt,f_r', [])]
+                self.bandgaps_uvvis = [round(float(peak[0]), 2) for peak in uvvis_dict.get('Eg,popt,f_r', [])]
 
                 uvvis_data = []
                 for m in [

@@ -23,7 +23,6 @@ def add_band_gap(archive, band_gaps):
     band_gap_deprecated_objects = []
 
     for gap in band_gaps:
-        gap = round(gap, 2) 
         bg_depr = BandGapDeprecated(value=np.float64(gap) * ureg('eV'))
         bg = BandGap(
             value=np.float64(gap) * ureg('eV'),
