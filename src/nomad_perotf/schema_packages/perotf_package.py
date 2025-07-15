@@ -6,7 +6,6 @@ from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
 from baseclasses.chemical import Chemical
 from baseclasses.experimental_plan import ExperimentalPlan
-from baseclasses.helper.add_solar_cell import add_band_gap
 from baseclasses.helper.utilities import (
     convert_datetime,
     get_encoding,
@@ -52,8 +51,17 @@ from baseclasses.wet_chemical_deposition import (
     WetChemicalDeposition,
 )
 from nomad.datamodel.data import EntryData
-from nomad.datamodel.results import ELN, Material, Properties, Results
+from nomad.datamodel.metainfo.common import ProvenanceTracker
+from nomad.datamodel.results import (
+    ELN,
+    BandGap,
+    ElectronicProperties,
+    Material,
+    Properties,
+    Results,
+)
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+from nomad.units import ureg
 
 m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 
@@ -1312,8 +1320,21 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 self.measurements = uvvis_data
 
         super().normalize(archive, logger)
-
-        add_band_gap(archive, self.bandgaps_uvvis.mean())
+        if self.bandgaps_uvvis:
+            if not archive.results:
+                archive.results = Results()
+            if not archive.results.properties:
+                archive.results.properties = Properties()
+            band_gaps_result = []
+            for bg in self.bandgaps_uvvis:
+                band_gaps_result.append(
+                    BandGap(
+                        value=np.float64(bg) * ureg('eV'),
+                        provenance=ProvenanceTracker(label='solar_cell_database'),
+                    )
+                )
+            electronic = ElectronicProperties(band_gap=band_gaps_result)
+            archive.results.properties.electronic = electronic
 
 
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
