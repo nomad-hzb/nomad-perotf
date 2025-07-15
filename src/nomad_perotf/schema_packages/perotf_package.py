@@ -1319,7 +1319,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 self.measurements = uvvis_data
 
         super().normalize(archive, logger)
-        if self.bandgaps_uvvis:
+        if self.bandgaps_uvvis is not None and len(self.bandgaps_uvvis) > 0:
             if not archive.results:
                 archive.results = Results()
             if not archive.results.properties:
