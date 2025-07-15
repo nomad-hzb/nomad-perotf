@@ -1480,7 +1480,7 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
 
                 if (
                     datetime.timedelta(seconds=1)
-                    < rew_time - fwd_time
+                    < abs(rew_time - fwd_time)
                     < datetime.timedelta(minutes=1)
                 ):
                     self.data_file_reverse = file.path
