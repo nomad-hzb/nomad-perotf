@@ -5,6 +5,7 @@ from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
 from baseclasses.chemical import Chemical
 from baseclasses.experimental_plan import ExperimentalPlan
+from baseclasses.helper.add_solar_cell import add_band_gap
 from baseclasses.helper.utilities import (
     convert_datetime,
     get_encoding,
@@ -1281,7 +1282,6 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 )
 
                 uvvis_dict = get_uvvis_data(f.read())
-                print(uvvis_dict)
 
                 """
                 #whats up with the time??
@@ -1316,6 +1316,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                         )
                     )
                 self.measurements = uvvis_data
+                add_band_gap(archive, uvvis_dict.get('Eg,popt,f_r')[0][0])
+
         super().normalize(archive, logger)
 
 
