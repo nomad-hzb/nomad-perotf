@@ -1,6 +1,7 @@
 # from nomad.units import ureg
 import datetime
 
+import numpy as np
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
 from baseclasses.chemical import Chemical
@@ -1240,6 +1241,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 order=[
                     'name',
                     'data_file',
+                    'bandgaps_uvvis',
                     'active_area',
                     'intensity',
                     'integration_time',
@@ -1263,7 +1265,13 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
         ],
     )
 
-    # not important and can be deleted?
+    bandgaps_uvvis = Quantity(
+        type=np.dtype(np.float64),
+        shape=['*'],
+        unit='eV',
+        description='List of band gaps derived from UV-Vis measurement.',
+        a_eln=dict(label='UV-Vis Band Gaps'),
+    )
 
     def normalize(self, archive, logger):
         self.method = 'UVvis Measurement'
@@ -1283,25 +1291,11 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
 
                 uvvis_dict = get_uvvis_data(f.read())
 
-                """
-                #whats up with the time??
-                try:
-                    self.datetime = convert_datetime(
-                        uvvis_dict['datetime'],
-                        datetime_format='%Y-%m-%d %H:%M:%S %p',
-                        utc=False,
-                    )
+                self.bandgaps_uvvis = [
+                    round(float(peak[0]), 2)
+                    for peak in uvvis_dict.get('Eg,popt,f_r', [])
+                ]
 
-                except Exception:
-                    try:
-                        self.datetime = convert_datetime(
-                            uvvis_dict['datetime'],
-                            datetime_format='%Y-%m-%d %H:%M:%S',
-                            utc=False,
-                        )
-                    except Exception:
-                        logger.warning('Couldnt parse datetime')
-                """
                 uvvis_data = []
                 for m in [
                     'reflection',
@@ -1316,9 +1310,10 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                         )
                     )
                 self.measurements = uvvis_data
-                add_band_gap(archive, uvvis_dict.get('Eg,popt,f_r')[0][0])
 
         super().normalize(archive, logger)
+
+        add_band_gap(archive, self.bandgaps_uvvis.mean())
 
 
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
