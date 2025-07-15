@@ -1292,7 +1292,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 uvvis_dict = get_uvvis_data(f.read())
 
                 self.bandgaps_uvvis = [
-                    round(float(peak[0]), 2)
+                    peak[0]
                     for peak in uvvis_dict.get('Eg,popt,f_r', [])
                 ]
 
@@ -1312,8 +1312,6 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 self.measurements = uvvis_data
 
         super().normalize(archive, logger)
-
-        add_band_gap(archive, self.bandgaps_uvvis.mean())
 
 
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
