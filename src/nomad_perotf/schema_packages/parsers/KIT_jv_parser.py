@@ -386,4 +386,11 @@ def get_jv_data(filedata):
         jv_dict['Fill_factor'] = list([ff[0]])
         jv_dict['Efficiency'] = list([pce[0]])
 
+
+        # to do's:
+        # 1: add parsing for other device: R-117_MPP_Lingyi_jv_scan
+        # 2: handle reverse and forward scans. make sure that the
+        #    jv_dict always has the same order of values (for example: reverse first, forward second )
+    
+    
     return jv_dict
