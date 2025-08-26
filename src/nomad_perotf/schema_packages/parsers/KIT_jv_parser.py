@@ -233,7 +233,7 @@ def get_jv_data(filedata):
     file_type = identify_file_type(filedata)
     jv_dict = {}
 
-    if file_type == 'labview':
+    if file_type in ['labview', 'puri']:
         df_header = pd.read_csv(
             StringIO(filedata),
             skiprows=0,
