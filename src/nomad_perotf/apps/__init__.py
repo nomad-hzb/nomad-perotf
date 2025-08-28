@@ -18,7 +18,7 @@ from nomad.config.models.ui import (
     MenuItemTerms,  # use histogram for numeric data
     MenuSizeEnum,  # for menu sizing
     ModeEnum,
-    RowActionNorth, 
+    RowActionNorth,  
     RowActions,
     RowDetails,
     Rows,
