@@ -70,7 +70,7 @@ m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 # %% ####################### Entities
 
 #copied from hysprint lab
-class HySprint_VoilaNotebook(VoilaNotebook, EntryData):
+class peroTF_VoilaNotebook(VoilaNotebook, EntryData):
     m_def = Section(a_eln=dict(hide=['lab_id']))
 
     def normalize(self, archive, logger):

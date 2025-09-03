@@ -1,4 +1,4 @@
-#absolutely stolen from HZB Hysprint lab: https://github.com/nomad-hzb/nomad-hysprint/blob/b7167fb77a25f4c11cf1c1746c254a2d3e7414b4/src/nomad_hysprint/apps/__init__.py
+#absolutely stolen from HZB Hysprint lab (sorry): https://github.com/nomad-hzb/nomad-hysprint/blob/b7167fb77a25f4c11cf1c1746c254a2d3e7414b4/src/nomad_hysprint/apps/__init__.py
 
 from nomad.config.models.plugins import AppEntryPoint
 from nomad.config.models.ui import (
@@ -28,8 +28,8 @@ from nomad.config.models.ui import (
     WidgetTerms,
 )
 
-schema_name = 'nomad_hysprint.schema_packages.hysprint_package.HySprint_VoilaNotebook'
-hysprint_voila_app = AppEntryPoint(
+schema_name = 'nomad_perotf.schema_packages.perotf_package.peroTF_VoilaNotebook'
+perotf_voila_app = AppEntryPoint(
     name='voila',
     description='Find and launch your Voila Tools.',
     app=App(
