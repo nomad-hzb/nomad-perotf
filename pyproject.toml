@@ -128,3 +128,7 @@ where = ["src"]
 perotf_package = "nomad_perotf.schema_packages:perotf_package"
 perotf_parser = "nomad_perotf.parsers:perotf_parser"
 perotf_experiment_parser = "nomad_perotf.parsers:perotf_experiment_parser"
+
+#voila app
+perotf_voila_app = "nomad_perotf.apps:perotf_voila_app"
+
