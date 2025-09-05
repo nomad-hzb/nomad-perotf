@@ -4,14 +4,16 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-
 def identify_file_type(file_content):
     """
-    Identify whether the file is from LabVIEW or Python
+    Identify whether the file is from LabVIEW, Python, or Puri
     by checking for specific keywords.
     """
     if 'Singapore Solar Simulator, Python' in file_content:
         return 'python'
+    
+    if 'measured by Puri' in file_content:
+        return 'puri'
 
     return 'labview'
 
@@ -231,7 +233,7 @@ def get_jv_data(filedata):
     file_type = identify_file_type(filedata)
     jv_dict = {}
 
-    if file_type == 'labview':
+    if file_type in ['labview', 'puri']:
         df_header = pd.read_csv(
             StringIO(filedata),
             skiprows=0,
