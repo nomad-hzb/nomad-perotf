@@ -36,6 +36,7 @@ from baseclasses.helper.solar_cell_batch_mapping import (
     map_evaporation,
     map_generic,
     map_inkjet_printing,
+    map_lamination,
     map_sdc,
     map_spin_coating,
     map_sputtering,
@@ -62,6 +63,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_DipCoating,
     peroTF_Evaporation,
     peroTF_InkjetPrinting,
+    peroTF_Lamination,
     peroTF_Process,
     peroTF_Sample,
     peroTF_SlotDieCoating,
@@ -170,6 +172,11 @@ class PeroTFExperimentParser(MatchingParser):
                         map_annealing_class(
                             i, j, lab_ids, row, upload_id, peroTF_ThermalAnnealing
                         )
+                    )
+
+                if 'Lamination' in col:  # move up
+                    archives.append(
+                        map_lamination(i, j, lab_ids, row, upload_id, peroTF_Lamination)
                     )
 
                 if pd.isna(row.get('Material name')):
