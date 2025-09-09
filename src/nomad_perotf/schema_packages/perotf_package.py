@@ -14,7 +14,6 @@ from baseclasses.helper.utilities import (
 from baseclasses.material_processes_misc import (
     Annealing,
     Cleaning,
-    Lamination,
     PlasmaCleaning,
     SolutionCleaning,
     UVCleaning,
@@ -928,15 +927,14 @@ class peroTF_InkjetPrinting(InkjetPrinting, EntryData):
     )
 
 
-# %% ## Lamination
+# %% ## Storage
 
 
-class peroTF_Lamination(Lamination, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present']
-        )
-    )
+# class peroTF_108_HyDryAir_Storage(Storage, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', 'location', 'end_time',  'steps', 'instruments']))
 
 
 # %%####################################### Measurements
