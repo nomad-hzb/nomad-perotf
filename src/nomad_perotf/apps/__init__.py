@@ -1,4 +1,4 @@
-#absolutely stolen from HZB Hysprint lab (sorry): https://github.com/nomad-hzb/nomad-hysprint/blob/b7167fb77a25f4c11cf1c1746c254a2d3e7414b4/src/nomad_hysprint/apps/__init__.py
+# absolutely stolen from HZB Hysprint lab (sorry): https://github.com/nomad-hzb/nomad-hysprint/blob/b7167fb77a25f4c11cf1c1746c254a2d3e7414b4/src/nomad_hysprint/apps/__init__.py
 
 from nomad.config.models.plugins import AppEntryPoint
 from nomad.config.models.ui import (
@@ -18,7 +18,7 @@ from nomad.config.models.ui import (
     MenuItemTerms,  # use histogram for numeric data
     MenuSizeEnum,  # for menu sizing
     ModeEnum,
-    RowActionNorth,  
+    RowActionNorth,
     RowActions,
     RowDetails,
     Rows,
@@ -60,14 +60,18 @@ perotf_voila_app = AppEntryPoint(
         filters_locked={'section_defs.definition_qualified_name': schema_name},
         filter_menus=FilterMenus(
             options={
-                'custom_quantities': FilterMenu(label='Notebooks', size=FilterMenuSizeEnum.L),
+                'custom_quantities': FilterMenu(
+                    label='Notebooks', size=FilterMenuSizeEnum.L
+                ),
                 'author': FilterMenu(label='Author', size=FilterMenuSizeEnum.M),
                 'metadata': FilterMenu(label='Visibility / IDs'),
             }
         ),
         columns=[
             Column(quantity=f'data.name#{schema_name}', selected=True),
-            Column(quantity='entry_type', label='Entry type', align='left', selected=True),
+            Column(
+                quantity='entry_type', label='Entry type', align='left', selected=True
+            ),
             Column(
                 quantity='entry_create_time',
                 label='Entry time',
@@ -135,7 +139,7 @@ perotf_voila_app = AppEntryPoint(
 )
 
 # I guess we don´t need that currently
-'''
+"""
 schema = 'nomad_hysprint.schema_packages.hysprint_package.HySprint_AbsPLMeasurement'
 
 absolute_pl_app = AppEntryPoint(
@@ -299,4 +303,4 @@ absolute_pl_app = AppEntryPoint(
         },
     ),
 )
-'''
+"""

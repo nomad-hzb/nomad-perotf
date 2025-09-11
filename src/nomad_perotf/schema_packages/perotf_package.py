@@ -41,6 +41,7 @@ from baseclasses.vapour_based_deposition import (
     Evaporations,
     Sputtering,
 )
+from baseclasses.voila import VoilaNotebook
 from baseclasses.wet_chemical_deposition import (
     BladeCoating,
     DipCoating,
@@ -63,13 +64,12 @@ from nomad.datamodel.results import (
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
 
-from baseclasses.voila import VoilaNotebook
-
 m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 
 # %% ####################### Entities
 
-#copied from hysprint lab
+
+# copied from hysprint lab
 class peroTF_VoilaNotebook(VoilaNotebook, EntryData):
     m_def = Section(a_eln=dict(hide=['lab_id']))
 
