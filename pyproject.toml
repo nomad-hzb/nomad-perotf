@@ -131,4 +131,5 @@ perotf_experiment_parser = "nomad_perotf.parsers:perotf_experiment_parser"
 
 #voila app
 perotf_voila_app = "nomad_perotf.apps:perotf_voila_app"
+solar_cell_overview_entry_point = "nomad_perotf.apps:solar_cell_overview_entry_point"
 
