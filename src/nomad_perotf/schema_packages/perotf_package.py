@@ -64,8 +64,14 @@ from nomad.datamodel.results import (
 )
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
+
 # from nomad_luqy_plugin.schema_packages.schema_package import AbsPLMeasurement, AbsPLResult, AbsPLSettings #PL Measurement from HZB LUQY plugin (PLQY?)
-from nomad_luqy_plugin.schema_packages.schema_package import AbsPLMeasurement, AbsPLResult, AbsPLSettings
+from nomad_luqy_plugin.schema_packages.schema_package import (
+    AbsPLMeasurement,
+    AbsPLResult,
+    AbsPLSettings,
+)
+
 m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 
 # %% ####################### Entities
@@ -1347,7 +1353,8 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
             electronic = ElectronicProperties(band_gap=band_gaps_result)
             archive.results.properties.electronic = electronic
 
-#big thx to hzb (micha and edgar)
+
+# big thx to hzb (micha and edgar)
 class peroTF_AbsPLResult(AbsPLResult):
     m_def = Section(label='AbsPLResult with iVoc')
 
@@ -1359,20 +1366,27 @@ class peroTF_AbsPLResult(AbsPLResult):
     )
 
     quasi_fermi_level_splitting_het = Quantity(
-        type=np.float64, unit='eV', a_eln=dict(component='NumberEditQuantity', label='Implied Voc HET')
+        type=np.float64,
+        unit='eV',
+        a_eln=dict(component='NumberEditQuantity', label='Implied Voc HET'),
     )
+
 
 class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
     m_def = Section(label='Absolute PL Measurement')
 
     def normalize(self, archive, logger):  # noqa: PLR0912, PLR0915
-        logger.debug('Starting peroTF_AbsPLMeasurement.normalize', data_file=self.data_file)
+        logger.debug(
+            'Starting peroTF_AbsPLMeasurement.normalize', data_file=self.data_file
+        )
         if self.settings is None:
             self.settings = AbsPLSettings()
 
         if self.data_file:
             try:
-                from nomad_perotf.schema_packages.parsers.KIT_abspl_parser import parse_abspl_data
+                from nomad_perotf.schema_packages.parsers.KIT_abspl_parser import (
+                    parse_abspl_data,
+                )
 
                 # Call the new parser function
                 (
@@ -1396,9 +1410,15 @@ class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
 
                     # Set spectral array data
                     self.results[0].wavelength = np.array(wavelengths, dtype=float)
-                    self.results[0].luminescence_flux_density = np.array(lum_flux, dtype=float)
-                    self.results[0].raw_spectrum_counts = np.array(raw_counts, dtype=float)
-                    self.results[0].dark_spectrum_counts = np.array(dark_counts, dtype=float)
+                    self.results[0].luminescence_flux_density = np.array(
+                        lum_flux, dtype=float
+                    )
+                    self.results[0].raw_spectrum_counts = np.array(
+                        raw_counts, dtype=float
+                    )
+                    self.results[0].dark_spectrum_counts = np.array(
+                        dark_counts, dtype=float
+                    )
                 else:
                     with archive.m_context.raw_file(self.data_file, 'br') as f:
                         encoding = get_encoding(f)
@@ -1407,11 +1427,15 @@ class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
                         parse_multiple_abspl,
                     )
 
-                    with archive.m_context.raw_file(self.data_file, 'tr', encoding=encoding) as f:
-                        settings_vals, result_vals, data = parse_multiple_abspl(f.read())
+                    with archive.m_context.raw_file(
+                        self.data_file, 'tr', encoding=encoding
+                    ) as f:
+                        settings_vals, result_vals, data = parse_multiple_abspl(
+                            f.read()
+                        )
                     for key, val in settings_vals.items():
                         try:
-                            setattr(self.settings, key, float(val)) 
+                            setattr(self.settings, key, float(val))
                         except Exception:
                             setattr(self.settings, key, val)
 

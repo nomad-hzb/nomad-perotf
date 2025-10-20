@@ -38,7 +38,9 @@ def parse_abspl_data(data_file, archive, logger):
     logger.debug('Read data file lines', file=data_file, total_lines=len(lines))
 
     settings_vals, result_vals, data_start_idx = parse_header(lines, logger)
-    wavelengths, lum_flux, raw_counts, dark_counts = parse_numeric_data(lines, data_start_idx, logger)
+    wavelengths, lum_flux, raw_counts, dark_counts = parse_numeric_data(
+        lines, data_start_idx, logger
+    )
 
     return settings_vals, result_vals, wavelengths, lum_flux, raw_counts, dark_counts
 
@@ -76,7 +78,9 @@ def parse_header(lines, logger):
                     try:
                         result_vals[header_map_result[key]] = float(val_str)
                     except ValueError:
-                        logger.debug('Could not convert result to float', key=key, val=val_str)
+                        logger.debug(
+                            'Could not convert result to float', key=key, val=val_str
+                        )
 
     logger.debug('Header parsed', header_done=header_done, data_start=data_start_idx)
     return settings_vals, result_vals, data_start_idx
@@ -119,7 +123,9 @@ def parse_numeric_data(lines, data_start_idx, logger):
 
 def parse_multiple_abspl(filedata):
     metadata_str, data_str = filedata.split('----------------------------', 1)
-    metadata = pd.read_csv(StringIO(metadata_str.strip()), sep='\t', header=None, index_col=0)
+    metadata = pd.read_csv(
+        StringIO(metadata_str.strip()), sep='\t', header=None, index_col=0
+    )
     data = pd.read_csv(StringIO(data_str.strip()), sep='\t', header=None, skiprows=2)
 
     settings_vals = {}
