@@ -98,7 +98,7 @@ def parse_numeric_data(lines, data_start_idx, logger):
         try:
             # Use pandas to read the data with flexible whitespace separation
             df = pd.read_csv(StringIO(data_str), delim_whitespace=True, header=None)
-            
+
             if len(df.columns) >= 3:  # We need at least 3 columns
                 wavelengths = df[0].tolist()
                 lum_flux = df[1].tolist()
