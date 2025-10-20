@@ -31,7 +31,6 @@ from baseclasses.solar_energy import (
     StandardSampleSolarCell,
     Substrate,
     UVvisData,
-    PLMeasurement,
     UVvisMeasurement,
 )
 from baseclasses.solution import Solution
@@ -64,7 +63,6 @@ from nomad.datamodel.results import (
 )
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
-
 from nomad_luqy_plugin.schema_packages.schema_package import (
     AbsPLMeasurement,
     AbsPLResult,
