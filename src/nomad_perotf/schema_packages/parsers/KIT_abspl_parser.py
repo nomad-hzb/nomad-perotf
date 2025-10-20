@@ -93,22 +93,20 @@ def parse_numeric_data(lines, data_start_idx, logger):
     dark_counts = []
 
     if data_start_idx is not None and data_start_idx < len(lines):
-        MIN_PARTS_COUNT = 3
-        for line in lines[data_start_idx:]:
-            if not line.strip():
-                continue
-            parts = line.split()
-            if len(parts) < MIN_PARTS_COUNT:
-                continue
-            try:
-                wavelengths.append(float(parts[0]))
-                lum_flux.append(float(parts[1]))
-                raw_counts.append(float(parts[2]))
-                if len(parts) == 3:
-                    continue  # Some files may not have dark counts
-                dark_counts.append(float(parts[3]))
-            except ValueError:
-                logger.debug('Could not parse numeric row', row=line)
+        # Combine the remaining lines into a single string
+        data_str = '\n'.join(lines[data_start_idx:])
+        try:
+            # Use pandas to read the data with flexible whitespace separation
+            df = pd.read_csv(StringIO(data_str), delim_whitespace=True, header=None)
+
+            if len(df.columns) >= 3:  # We need at least 3 columns
+                wavelengths = df[0].tolist()
+                lum_flux = df[1].tolist()
+                raw_counts = df[2].tolist()
+                if len(df.columns) > 3:  # If we have dark counts
+                    dark_counts = df[3].tolist()
+        except Exception as e:
+            logger.debug('Could not parse numeric data with pandas', error=str(e))
 
     logger.debug(
         'Parsed numeric data',
