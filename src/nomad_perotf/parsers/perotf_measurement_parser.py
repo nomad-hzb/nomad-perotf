@@ -42,6 +42,7 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_perotf.schema_packages.perotf_package import (
+    peroTF_AbsPLMeasurement,
     peroTF_JVmeasurement,
     peroTF_Measurement,
     peroTF_MPPTracking,
@@ -98,6 +99,8 @@ class PeroTFParser(MatchingParser):
                 entry.multijunction_position = 'mid'
             if 'bot' in mainfile_split[1]:
                 entry.multijunction_position = 'bottom'
+        if mainfile_split[-1] in ['txt'] and mainfile_split[-2] == 'abspl':
+            entry = peroTF_AbsPLMeasurement()
 
         archive.metadata.entry_name = os.path.basename(mainfile)
         search_id = mainfile_split[0]

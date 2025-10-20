@@ -31,7 +31,6 @@ from baseclasses.solar_energy import (
     StandardSampleSolarCell,
     Substrate,
     UVvisData,
-    # PLMeasurement,
     UVvisMeasurement,
 )
 from baseclasses.solution import Solution
@@ -64,6 +63,11 @@ from nomad.datamodel.results import (
 )
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
+from nomad_luqy_plugin.schema_packages.schema_package import (
+    AbsPLMeasurement,
+    AbsPLResult,
+    AbsPLSettings,
+)
 
 m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 
@@ -1345,6 +1349,114 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 )
             electronic = ElectronicProperties(band_gap=band_gaps_result)
             archive.results.properties.electronic = electronic
+
+
+# big thx to hzb (micha and edgar)
+class peroTF_AbsPLResult(AbsPLResult):
+    m_def = Section(label='AbsPLResult with iVoc')
+
+    i_voc = Quantity(
+        type=np.float64,
+        unit='V',
+        description='iVoc in V, e.g. 1.23.',
+        a_eln=dict(component='NumberEditQuantity', label='iVoc'),
+    )
+
+    quasi_fermi_level_splitting_het = Quantity(
+        type=np.float64,
+        unit='eV',
+        a_eln=dict(component='NumberEditQuantity', label='Implied Voc HET'),
+    )
+
+
+class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
+    m_def = Section(label='Absolute PL Measurement')
+
+    def normalize(self, archive, logger):  # noqa: PLR0912, PLR0915
+        logger.debug(
+            'Starting peroTF_AbsPLMeasurement.normalize', data_file=self.data_file
+        )
+        if self.settings is None:
+            self.settings = AbsPLSettings()
+
+        if self.data_file:
+            try:
+                from nomad_perotf.schema_packages.parsers.KIT_abspl_parser import (
+                    parse_abspl_data,
+                )
+
+                # Call the new parser function
+                (
+                    settings_vals,
+                    result_vals,
+                    wavelengths,
+                    lum_flux,
+                    raw_counts,
+                    dark_counts,
+                ) = parse_abspl_data(self.data_file, archive, logger)
+                if result_vals:
+                    # Set settings
+                    for key, val in settings_vals.items():
+                        setattr(self.settings, key, val)
+
+                    # Set results header values
+                    if not self.results:
+                        self.results = [peroTF_AbsPLResult()]
+                    for key, val in result_vals.items():
+                        setattr(self.results[0], key, val)
+
+                    # Set spectral array data
+                    self.results[0].wavelength = np.array(wavelengths, dtype=float)
+                    self.results[0].luminescence_flux_density = np.array(
+                        lum_flux, dtype=float
+                    )
+                    self.results[0].raw_spectrum_counts = np.array(
+                        raw_counts, dtype=float
+                    )
+                    self.results[0].dark_spectrum_counts = np.array(
+                        dark_counts, dtype=float
+                    )
+                else:
+                    with archive.m_context.raw_file(self.data_file, 'br') as f:
+                        encoding = get_encoding(f)
+
+                    from nomad_perotf.schema_packages.parsers.KIT_abspl_parser import (
+                        parse_multiple_abspl,
+                    )
+
+                    with archive.m_context.raw_file(
+                        self.data_file, 'tr', encoding=encoding
+                    ) as f:
+                        settings_vals, result_vals, data = parse_multiple_abspl(
+                            f.read()
+                        )
+                    for key, val in settings_vals.items():
+                        try:
+                            setattr(self.settings, key, float(val))
+                        except Exception:
+                            setattr(self.settings, key, val)
+
+                    number_of_measurements = len(data.columns) - 1
+                    results = []
+                    for i in range(1, number_of_measurements + 1):
+                        r = peroTF_AbsPLResult()
+                        for key, val in result_vals.items():
+                            try:
+                                setattr(r, key, val[i])
+                            except Exception:
+                                setattr(r, key, float(val[i]))
+
+                        r.wavelength = data[0]
+                        r.raw_spectrum_counts = data[i]
+                        results.append(r)
+
+                    self.results = results
+
+            except Exception as e:
+                logger.warning(f'Could not parse the data file "{self.data_file}": {e}')
+                print(e)
+
+        super().normalize(archive, logger)
 
 
 class peroTF_JVmeasurement(JVMeasurement, EntryData):
