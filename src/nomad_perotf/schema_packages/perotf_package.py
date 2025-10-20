@@ -65,7 +65,6 @@ from nomad.datamodel.results import (
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
 
-# from nomad_luqy_plugin.schema_packages.schema_package import AbsPLMeasurement, AbsPLResult, AbsPLSettings #PL Measurement from HZB LUQY plugin (PLQY?)
 from nomad_luqy_plugin.schema_packages.schema_package import (
     AbsPLMeasurement,
     AbsPLResult,
