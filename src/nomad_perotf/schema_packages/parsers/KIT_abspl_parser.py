@@ -38,9 +38,7 @@ def parse_abspl_data(data_file, archive, logger):
     logger.debug('Read data file lines', file=data_file, total_lines=len(lines))
 
     settings_vals, result_vals, data_start_idx = parse_header(lines, logger)
-    wavelengths, lum_flux, raw_counts, dark_counts = parse_numeric_data(
-        lines, data_start_idx, logger
-    )
+    wavelengths, lum_flux, raw_counts, dark_counts = parse_numeric_data(lines, data_start_idx, logger)
 
     return settings_vals, result_vals, wavelengths, lum_flux, raw_counts, dark_counts
 
@@ -78,9 +76,7 @@ def parse_header(lines, logger):
                     try:
                         result_vals[header_map_result[key]] = float(val_str)
                     except ValueError:
-                        logger.debug(
-                            'Could not convert result to float', key=key, val=val_str
-                        )
+                        logger.debug('Could not convert result to float', key=key, val=val_str)
 
     logger.debug('Header parsed', header_done=header_done, data_start=data_start_idx)
     return settings_vals, result_vals, data_start_idx
@@ -93,20 +89,22 @@ def parse_numeric_data(lines, data_start_idx, logger):
     dark_counts = []
 
     if data_start_idx is not None and data_start_idx < len(lines):
-        # Combine the remaining lines into a single string
-        data_str = '\n'.join(lines[data_start_idx:])
-        try:
-            # Use pandas to read the data with flexible whitespace separation
-            df = pd.read_csv(StringIO(data_str), delim_whitespace=True, header=None)
-
-            if len(df.columns) >= 3:  # We need at least 3 columns
-                wavelengths = df[0].tolist()
-                lum_flux = df[1].tolist()
-                raw_counts = df[2].tolist()
-                if len(df.columns) > 3:  # If we have dark counts
-                    dark_counts = df[3].tolist()
-        except Exception as e:
-            logger.debug('Could not parse numeric data with pandas', error=str(e))
+        MIN_PARTS_COUNT = 3
+        for line in lines[data_start_idx:]:
+            if not line.strip():
+                continue
+            parts = line.split()
+            if len(parts) < MIN_PARTS_COUNT:
+                continue
+            try:
+                wavelengths.append(float(parts[0]))
+                lum_flux.append(float(parts[1]))
+                raw_counts.append(float(parts[2]))
+                if len(parts) == 3:
+                    continue  # Some files may not have dark counts
+                dark_counts.append(float(parts[3]))
+            except ValueError:
+                logger.debug('Could not parse numeric row', row=line)
 
     logger.debug(
         'Parsed numeric data',
@@ -121,9 +119,7 @@ def parse_numeric_data(lines, data_start_idx, logger):
 
 def parse_multiple_abspl(filedata):
     metadata_str, data_str = filedata.split('----------------------------', 1)
-    metadata = pd.read_csv(
-        StringIO(metadata_str.strip()), sep='\t', header=None, index_col=0
-    )
+    metadata = pd.read_csv(StringIO(metadata_str.strip()), sep='\t', header=None, index_col=0)
     data = pd.read_csv(StringIO(data_str.strip()), sep='\t', header=None, skiprows=2)
 
     settings_vals = {}
