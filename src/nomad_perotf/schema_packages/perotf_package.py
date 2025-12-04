@@ -53,13 +53,18 @@ from baseclasses.wet_chemical_deposition import (
 )
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.common import ProvenanceTracker
+from nomad.datamodel.metainfo.plot import PlotSection
 from nomad.datamodel.results import (
     ELN,
     BandGap,
+    BandGapDeprecated,
+    BandStructureElectronic,
     ElectronicProperties,
     Material,
+    OptoelectronicProperties,
     Properties,
     Results,
+    SolarCell,
 )
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
@@ -1792,6 +1797,249 @@ class peroTF_Measurement(BaseMeasurement, EntryData):
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
+
+
+# EQE stolen from FAIRMAT, but it needs to point on our parser (that is also stolen) sorry
+
+
+def add_band_gap(archive, band_gap):
+    """Adds a band gap value (in eV) with the additional section structure for solar
+    cell data.eV=
+    """
+    if band_gap is not None:
+        bg = BandGapDeprecated(value=np.float64(band_gap) * ureg('eV'))
+        band_gap = BandGap(
+            value=np.float64(band_gap) * ureg('eV'),
+            provenance=ProvenanceTracker(label='solar_cell_database'),
+        )  # TODO: check label
+        band_structure = BandStructureElectronic(
+            band_gap=[bg]
+        )  # TODO: to be removed after reparsing
+        electronic = ElectronicProperties(
+            band_structure_electronic=[band_structure], band_gap=[band_gap]
+        )
+        archive.results.properties.electronic = electronic
+
+
+def add_solar_cell(archive):
+    """Adds metainfo structure for solar cell data."""
+    if not archive.results:
+        archive.results = Results()
+    if not archive.results.properties:
+        archive.results.properties = Properties()
+    if not archive.results.properties.optoelectronic:
+        archive.results.properties.optoelectronic = OptoelectronicProperties()
+    if not archive.results.properties.optoelectronic.solar_cell:
+        archive.results.properties.optoelectronic.solar_cell = SolarCell()
+
+
+class SolarCellEQE(PlotSection):
+    m_def = Section(
+        a_eln=dict(lane_width='600px'),
+        a_plotly_graph_object=[
+            {'data': {'x': '#photon_energy_array', 'y': '#raw_eqe_array'}},
+            {'data': {'x': '#raw_photon_energy_array', 'y': '#raw_eqe_array'}},
+            {'data': {'x': '#raw_wavelength_array', 'y': '#raw_eqe_array'}},
+            {'data': {'x': '#photon_energy_array', 'y': '#eqe_array'}},
+            {'data': {'x': '#wavelength_array', 'y': '#eqe_array'}},
+            {'data': {'x': '#photon_energy_array', 'y': '#eqe_array'}},
+        ],
+    )
+
+    eqe_data_file = Quantity(
+        type=str,
+        description="""
+                    Drop here your eqe file and click save for processing.
+                    """,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    header_lines = Quantity(
+        type=np.dtype(np.int64),
+        default=0,
+        description="""
+        Number of header lines in the file. Edit in case your file has a header.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    light_bias = Quantity(
+        type=np.dtype(np.float64),
+        unit=('mW/cm**2'),
+        shape=[],
+        description="""
+        The light intensity of any bias light during the EQE measurement.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    bandgap_eqe = Quantity(
+        type=np.dtype(np.float64),
+        shape=[],
+        unit='eV',
+        description="""
+        Bandgap derived from the EQE spectrum.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    integrated_jsc = Quantity(
+        type=np.dtype(np.float64),
+        unit='mA / cm**2',
+        shape=[],
+        description="""
+        The integrated short circuit current density $J_{SC}$ from the product of the EQE spectrum
+        with the *AM 1.5G* sun spectrum.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    integrated_j0rad = Quantity(
+        type=np.dtype(np.float64),
+        unit='mA / cm**2',
+        shape=[],
+        description="""
+        The integrated $J_{0, Rad}$ derived from the EQE data.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    voc_rad = Quantity(
+        type=np.dtype(np.float64),
+        shape=[],
+        unit='V',
+        description="""
+        Radiative $V_{OC}$ derived from the EQE data in V.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    urbach_energy = Quantity(
+        type=np.dtype(np.float64),
+        shape=[],
+        unit='eV',
+        description="""
+        Urbach energy fitted from the eqe in eV.
+        """,
+        a_eln=dict(component='NumberEditQuantity'),
+    )
+
+    urbach_energy_fit_std_dev = Quantity(
+        type=np.dtype(np.float64),
+        shape=[],
+        unit='eV',
+        description="""
+        Standard deviation of the fitted Urbach energy parameter from the eqe in eV.
+        """,
+    )
+
+    def derive_n_values(self):
+        if self.eqe_array is not None:
+            return len(self.eqe_array)
+        if self.photon_energy_array is not None:
+            return len(self.photon_energy_array)
+        else:
+            return 0
+
+    n_values = Quantity(type=int, derived=derive_n_values)
+
+    def derive_n_raw_values(self):
+        if self.raw_eqe_array is not None:
+            return len(self.raw_eqe_array)
+        if self.raw_photon_energy_array is not None:
+            return len(self.raw_photon_energy_array)
+        else:
+            return 0
+
+    n_raw_values = Quantity(type=int, derived=derive_n_raw_values)
+
+    raw_eqe_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_raw_values'],
+        description='EQE array of the spectrum',
+    )
+
+    raw_photon_energy_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_raw_values'],
+        unit='eV',
+        description='Raw Photon energy array of the eqe spectrum',
+    )
+
+    raw_wavelength_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_raw_values'],
+        unit='nanometer',
+        description='Raw wavelength array of the eqe spectrum',
+    )
+
+    eqe_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_values'],
+        description='EQE array of the spectrum',
+    )
+
+    wavelength_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_values'],
+        unit='nanometer',
+        description='Interpolated/extrapolated wavelength array with *E<sub>u</sub>* of the eqe spectrum ',
+    )
+
+    photon_energy_array = Quantity(
+        type=np.dtype(np.float64),
+        shape=['n_values'],
+        unit='eV',
+        description='Interpolated/extrapolated photon energy array with a *E<sub>u</sub>*  of the eqe spectrum',
+    )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+        if self.eqe_data_file:
+            with archive.m_context.raw_file(self.eqe_data_file) as f:
+                # Import `EQEAnalyzer` is slow (owing to scipy)
+                from nomad_perotf.schema_packages.parsers.KIT_eqe_parser import (
+                    EQEAnalyzer,
+                )
+
+                eqe_dict = EQEAnalyzer(
+                    f.name, header_lines=self.header_lines
+                ).eqe_dict()
+                self.measured = True
+                self.bandgap_eqe = eqe_dict['bandgap']
+                self.integrated_jsc = eqe_dict['jsc'] * ureg('A/m**2')
+                self.integrated_j0rad = (
+                    eqe_dict['j0rad'] * ureg('A/m**2')
+                    if 'j0rad' in eqe_dict
+                    else logger.warning('The j0rad could not be calculated.')
+                )
+                self.voc_rad = (
+                    eqe_dict['voc_rad']
+                    if 'voc_rad' in eqe_dict
+                    else logger.warning('The voc_rad could not be calculated.')
+                )
+                self.urbach_energy = (
+                    eqe_dict['urbach_e']
+                    if 'urbach_e' in eqe_dict
+                    else logger.warning('The urbach_energy could not be calculated.')
+                )
+                if 'error_urbach_std' in eqe_dict:
+                    self.urbach_energy_fit_std_dev = eqe_dict['error_urbach_std']
+                self.photon_energy_array = np.array(
+                    eqe_dict['interpolated_photon_energy']
+                )
+                self.raw_photon_energy_array = np.array(eqe_dict['photon_energy_raw'])
+                self.eqe_array = np.array(eqe_dict['interpolated_eqe'])
+                self.raw_eqe_array = np.array(eqe_dict['eqe_raw'])
+
+        if self.photon_energy_array is not None:
+            self.wavelength_array = self.photon_energy_array.to('nm', 'sp')  # pylint: disable=E1101
+            self.raw_wavelength_array = self.raw_photon_energy_array.to('nm', 'sp')  # pylint: disable=E1101
+
+        add_solar_cell(archive)
+        add_band_gap(archive, self.bandgap_eqe)
 
 
 m_package.__init_metainfo__()
