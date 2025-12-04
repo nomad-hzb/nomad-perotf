@@ -53,20 +53,19 @@ from baseclasses.wet_chemical_deposition import (
 )
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.common import ProvenanceTracker
+from nomad.datamodel.metainfo.plot import PlotSection
 from nomad.datamodel.results import (
     ELN,
     BandGap,
-    ElectronicProperties,
-    Material,
-    Properties,
-    Results,
     BandGapDeprecated,
     BandStructureElectronic,
+    ElectronicProperties,
+    Material,
     OptoelectronicProperties,
+    Properties,
+    Results,
     SolarCell,
 )
-from nomad.datamodel.metainfo.plot import PlotSection
-
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad.units import ureg
 from nomad_luqy_plugin.schema_packages.schema_package import (
@@ -1800,7 +1799,8 @@ class peroTF_Measurement(BaseMeasurement, EntryData):
     )
 
 
-#EQE stolen from FAIRMAT, but it needs to point on our parser (that is also stolen) sorry
+# EQE stolen from FAIRMAT, but it needs to point on our parser (that is also stolen) sorry
+
 
 def add_band_gap(archive, band_gap):
     """Adds a band gap value (in eV) with the additional section structure for solar
@@ -1831,6 +1831,7 @@ def add_solar_cell(archive):
         archive.results.properties.optoelectronic = OptoelectronicProperties()
     if not archive.results.properties.optoelectronic.solar_cell:
         archive.results.properties.optoelectronic.solar_cell = SolarCell()
+
 
 class SolarCellEQE(PlotSection):
     m_def = Section(
@@ -1999,7 +2000,9 @@ class SolarCellEQE(PlotSection):
         if self.eqe_data_file:
             with archive.m_context.raw_file(self.eqe_data_file) as f:
                 # Import `EQEAnalyzer` is slow (owing to scipy)
-                from nomad_perotf.schema_packages.parsers.KIT_eqe_parser import EQEAnalyzer
+                from nomad_perotf.schema_packages.parsers.KIT_eqe_parser import (
+                    EQEAnalyzer,
+                )
 
                 eqe_dict = EQEAnalyzer(
                     f.name, header_lines=self.header_lines

@@ -21,7 +21,7 @@
 # Building from the work of Lisa Krückemeier et al. (https://doi.org/10.1002/aenm.201902573)
 # Initially translated to Python by Christian Wolff
 
-#stolen from the internal FAIRmat EQE parser, but we had to adapt it to work with our files
+# stolen from the internal FAIRmat EQE parser, but we had to adapt it to work with our files
 import os
 
 import numpy as np
@@ -104,13 +104,13 @@ class EQEAnalyzer:
                         df = pd.read_csv(self.file_path, header=int(self.header_lines))
                         if len(df.columns) < 2:
                             raise IndexError
-        
+
         # Keep only the first 2 columns (wavelength/energy and EQE) IN CASE OF XUZHENGS DUMB MACHINE (ENLITEC)
         df = df.iloc[:, :2]
-        
+
         # Replace comma decimal separators with periods
         df = df.astype(str).apply(lambda col: col.str.replace(',', '.'))
-        
+
         # Convert to numeric and drop rows with NaN only in both columns
         df = df.apply(pd.to_numeric, errors='coerce')
         df = df.dropna()
@@ -197,7 +197,9 @@ class EQEAnalyzer:
             # find inflection point
             infl_point = (
                 log_data.rolling(
-                    window=filter_window, min_periods=int(filter_window / 4), center=True
+                    window=filter_window,
+                    min_periods=int(filter_window / 4),
+                    center=True,
                 )
                 .mean()
                 .diff()
@@ -209,28 +211,31 @@ class EQEAnalyzer:
             self.min_eqe_fit = min_eqe_fit
             # max_eqe_fit = self.find_nearest(y, min_eqe_fit * 8)
             self.max_eqe_fit = max_eqe_fit
-            
+
             # Use approximate range instead of exact value matching for robustness
             start_idx = np.argmin(np.abs(y - min_eqe_fit))
             stop_idx = np.argmin(np.abs(y - max_eqe_fit))
-            
+
             # Ensure start < stop
             if start_idx > stop_idx:
                 start_idx, stop_idx = stop_idx, start_idx
-            
+
             # Ensure we have enough data points for fitting (at least 3)
             if (stop_idx - start_idx) < 3:
-                raise ValueError("Not enough data points in the fitting range")
-            
+                raise ValueError('Not enough data points in the fitting range')
+
             self.start = start_idx
             self.stop = stop_idx
-            
+
             # Ensure y[start:stop] is not empty
             if len(y[start_idx:stop_idx]) == 0:
-                raise ValueError("Empty data range for fitting")
-            
+                raise ValueError('Empty data range for fitting')
+
             popt, pcov = optimize.curve_fit(  # pylint: disable=unbalanced-tuple-unpacking
-                self.linear, x[start_idx:stop_idx], np.log(y[start_idx:stop_idx]), p0=[min(y) * 8, 0.026]
+                self.linear,
+                x[start_idx:stop_idx],
+                np.log(y[start_idx:stop_idx]),
+                p0=[min(y) * 8, 0.026],
             )
             m = popt[1]
             fit_min, fit_max = x[start_idx], x[stop_idx]
@@ -241,7 +246,7 @@ class EQEAnalyzer:
 
             return urbach_e, m, fit_min, fit_max, urbach_e_std
         except (ValueError, IndexError, RuntimeError) as e:
-            raise ValueError(f"Failed to estimate Urbach Energy: {str(e)}")
+            raise ValueError(f'Failed to estimate Urbach Energy: {str(e)}')
 
     # Extrapolate with an array of the fitted fitted EQE data to the interpolated eqe at a value of min_eqe_fit
     def extrapolate_eqe(self):
@@ -400,7 +405,7 @@ class EQEAnalyzer:
         )
         eqe_dict['jsc'] = self.calculate_jsc()
         eqe_dict['bandgap'] = self.calculate_bandgap()
-        
+
         try:
             urbach_e = self.fit_urbach_tail()[0]
             if urbach_e <= 0.0 or urbach_e >= 0.5:
@@ -413,7 +418,7 @@ class EQEAnalyzer:
                 )
         except (ValueError, IndexError, RuntimeError) as e:
             print(f'Failed to estimate a reasonable Urbach Energy: {str(e)}')
-        
+
         try:
             eqe_dict['j0rad'], eqe_dict['el'] = self.calculate_j0rad()
             eqe_dict['voc_rad'] = self.calculate_voc_rad()
