@@ -67,23 +67,14 @@ class RawFileperoTF(EntryData):
 def identify_EQE_headerlines(file_content):
     """
     Identify the EQE file type and return the corresponding number of header lines.
-    
-    Args:
-        file_content (str): The content of the EQE data file
-    
-    Returns:
-        int: Number of header lines for the specific file type
     """
     if 'VERSION: BenWin' in file_content:
         return 63  # Bentham EQE system
     
     if 'Measure Mode\tAC-EQE' in file_content:
-        return 30  # Enlitec EQE system (adjust this number based on actual file)
-    
+        return 4  # Enlitec EQE system (adjust this number based on actual file)
     # Default fallback
     return 63
-
-
 
 class PeroTFParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
@@ -100,9 +91,6 @@ class PeroTFParser(MatchingParser):
                 return
             entry = peroTF_JVmeasurement()
 
-
-
-
         if mainfile_split[-1] == 'dat' and mainfile_split[-2] == 'eqe':
             # Read file content to detect file type and determine header lines
             with archive.m_context.raw_file(mainfile, 'br') as f:
@@ -117,10 +105,6 @@ class PeroTFParser(MatchingParser):
             sc_eqe.header_lines = header_lines
             entry = peroTF_TFL_GammaBox_EQEmeasurement()
             entry.eqe_data = [sc_eqe]
-
-
-
-
 
         if mainfile_split[-1] in ['csv', 'txt'] and mainfile_split[-2] == 'mpp':
             entry = peroTF_MPPTracking()
