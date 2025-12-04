@@ -36,7 +36,8 @@ from nomad.datamodel.metainfo.annotations import (
 from nomad.datamodel.metainfo.basesections import (
     Activity,
 )
-from nomad.datamodel.metainfo.eln import SolarCellEQE
+
+from nomad_perotf.schema_packages.perotf_package import SolarCellEQE #its the copied one from FAIRMAT
 from nomad.metainfo import (
     Quantity,
 )
@@ -90,7 +91,7 @@ class PeroTFParser(MatchingParser):
 
         if mainfile_split[-1] == 'txt' and mainfile_split[-2] == 'eqe':
             # Enlitec EQE system
-            header_lines=4
+            header_lines=5
             sc_eqe = SolarCellEQE()
             sc_eqe.eqe_data_file = os.path.basename(mainfile)
             sc_eqe.header_lines = header_lines
