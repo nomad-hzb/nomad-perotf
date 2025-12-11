@@ -17,11 +17,13 @@
 #
 
 
-# Evaluation of EQE measurement data + Urbach tail to determine the radiative open-circuit voltage.
+# Evaluation of EQE measurement data + Urbach tail to determine the radiative
+# open-circuit voltage.
 # Building from the work of Lisa Krückemeier et al. (https://doi.org/10.1002/aenm.201902573)
 # Initially translated to Python by Christian Wolff
 
-# stolen from the internal FAIRmat EQE parser, but we had to adapt it to work with our files
+# stolen from the internal FAIRmat EQE parser, but we had to adapt it to work with our
+# files
 import os
 
 import numpy as np
@@ -46,11 +48,14 @@ class EQEAnalyzer:
     """
     A class for analyzing the EQE data of solar cells. Contains the following methods:
     - `read_file`: reads the file and returns the columns in a pandas DataFrame `df`.
-    - `arrange_eqe_columns`: gets a df with columns of the file and returns a `photon_energy_raw` array and `eqe_raw` array with values of the photon energy values in *eV* and the eqe (values between 0 and 1) respectively.
+    - `arrange_eqe_columns`: gets a df with columns of the file and returns a
+    `photon_energy_raw` array and `eqe_raw` array with values of the photon energy
+    values in *eV* and the eqe (values between 0 and 1) respectively.
     - `interpolate_eqe`: interpolates the eqe data to a given photon energy range.
     - `fit_urbach_tail`: fits the Urbach tail to the eqe data.
     - `extrapolate_eqe`: extrapolates the eqe data after having fitted an Urbach tail.
-    - `calculate_jsc`: calculates the short circuit current density integrating the product
+    - `calculate_jsc`: calculates the short circuit current density integrating the
+    product
     of the eqe and the solar spectrum am1.5.
     - `calculate_voc_rad`: calculates the open circuit voltage at the radiative limit
     with the calculated `j_sc` and `j0rad`.
@@ -93,19 +98,22 @@ class EQEAnalyzer:
                     if len(df.columns) < 2:
                         raise IndexError
                 except IndexError:
-                    try:  # separator was right, but last header_line is not actually column names?
+                    try:  # separator was right, but
+                        # last header_line is not actually column names?
                         df = pd.read_csv(
                             self.file_path, header=int(self.header_lines), sep='\t'
                         )
                         if len(df.columns) < 2:
                             raise IndexError
                     except IndexError:
-                        # Last guess: separator was wrong AND last header_line is not actually column names?
+                        # Last guess: separator was wrong AND last
+                        # header_line is not actually column names?
                         df = pd.read_csv(self.file_path, header=int(self.header_lines))
                         if len(df.columns) < 2:
                             raise IndexError
 
-        # Keep only the first 2 columns (wavelength/energy and EQE) IN CASE OF XUZHENGS DUMB MACHINE (ENLITEC)
+        # Keep only the first 2 columns (wavelength/energy and EQE)
+        # IN CASE OF XUZHENGS DUMB MACHINE (ENLITEC)
         df = df.iloc[:, :2]
 
         # Replace comma decimal separators with periods
@@ -143,7 +151,9 @@ class EQEAnalyzer:
             y = y / 100
         if (
             x[1] - x[2] > 0
-        ):  # bring both arrays into correct order (i.e. w.r.t eV increasing) if one started with e.g. wavelength in increasing order e.g. 300nm, 305nm,...
+        ):  # bring both arrays into correct order (i.e. w.r.t eV increasing)
+            # if one started with e.g. wavelength in increasing order e.g. 300nm,
+            # 305nm,...
             x.sort()
             y = np.flip(y)
 
@@ -166,7 +176,8 @@ class EQEAnalyzer:
     def linear(self, x, a, b):
         return a * x + b
 
-    # Select a range from a numpy array from a given value to a given value and rerturn the indexes
+    # Select a range from a numpy array from a given value to a
+    # given value and rerturn the indexes
     def select_range(self, array, value_start, value_end):
         idx_start = np.where(array == value_start)[0][0]
         idx_end = np.where(array == value_end)[0][0]
@@ -176,9 +187,10 @@ class EQEAnalyzer:
     def fit_urbach_tail(self, fit_window=0.06, filter_window=20):
         """
         Fits the Urbach tail to the EQE data. To select the fitting range,
-        finds the maximun of the derivative of the log(eqe) data. Then selects the range
-        by going down a factor of 8 in eqe values from this reference point and up a factor of 2.
-        This is unfortunately only a quick fix, but it works well enough based a few empirical tests
+        finds the maximun of the derivative of the log(eqe) data. Then selects the
+        range by going down a factor of 8 in eqe values from this reference point and
+        up a factor of 2. This is unfortunately only a quick fix, but it works well
+        enough based a few empirical tests
         with eqe data of perovskite solar cells.
 
         Returns:
@@ -248,13 +260,15 @@ class EQEAnalyzer:
         except (ValueError, IndexError, RuntimeError) as e:
             raise ValueError(f'Failed to estimate Urbach Energy: {str(e)}')
 
-    # Extrapolate with an array of the fitted fitted EQE data to the interpolated eqe at a value of min_eqe_fit
+    # Extrapolate with an array of the fitted fitted EQE data to the
+    # interpolated eqe at a value of min_eqe_fit
     def extrapolate_eqe(self):
         """
         Extrapolates the EQE data with the fitted Urbach tail.
 
         Returns:
-            photon_energy_extrapolated: array of the extrapolated photon energy values in eV
+            photon_energy_extrapolated: array of the extrapolated photon energy values
+            in eV
             eqe_extrapolated: array of the extrapolated eqe values
         """
         try:
@@ -315,7 +329,8 @@ class EQEAnalyzer:
 
     def calculate_j0rad(self):
         """
-        Calculates the radiative saturation current (j0rad) and the calculated electroluminescence (EL)
+        Calculates the radiative saturation current (j0rad) and the calculated
+        electroluminescence (EL)
         spectrum (Rau's reciprocity) from the extrapolated eqe.
 
         Returns:
@@ -324,10 +339,11 @@ class EQEAnalyzer:
         """
         try:
             urbach_e = self.fit_urbach_tail()[0]
-            # try to calculate the j0rad and EL spectrum except if the urbach energy is larger than 0.026
+            # try to calculate the j0rad and EL spectrum except if
+            # the urbach energy is larger than 0.026
             if urbach_e >= 0.026 or urbach_e <= 0.0:
-                raise ValueError("""Urbach energy is > 0.026 eV (~kB*T for T = 300K), or
-                it could notbe estimated. The `j0rad` could not be calculated.""")
+                raise ValueError("""Urbach energy is > 0.026 eV (~kB*T for T = 300K), 
+                or it could notbe estimated. The `j0rad` could not be calculated.""")
 
             x, y = self.extrapolate_eqe()
             phi_BB = (2 * np.pi * q**3 * (x) ** 2) / (
@@ -343,8 +359,8 @@ class EQEAnalyzer:
 
     def calculate_voc_rad(self):
         """
-        Calculates the radiative open circuit voltage (voc_rad) with the calculted j0rad
-        and j_sc.
+        Calculates the radiative open circuit voltage (voc_rad) with the calculted
+        j0rad and j_sc.
 
         Returns:
             voc_rad: radiative open circuit voltage in V
@@ -424,7 +440,8 @@ class EQEAnalyzer:
             eqe_dict['voc_rad'] = self.calculate_voc_rad()
         except ValueError as e:
             print(
-                f'Urbach energy is > 0.026 eV (~kB*T for T = 300K) or could not be estimated.\n'
+                f'Urbach energy is > 0.026 eV (~kB*T for T = 300K)'
+                f'or could not be estimated.\n'
                 f'The `j0rad`, `el` and `voc_rad` could not be calculated: {str(e)}'
             )
 
