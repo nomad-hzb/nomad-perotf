@@ -1799,7 +1799,8 @@ class peroTF_Measurement(BaseMeasurement, EntryData):
     )
 
 
-# EQE stolen from FAIRMAT, but it needs to point on our parser (that is also stolen) sorry
+# EQE stolen from FAIRMAT,
+# but it needs to point on our parser (that is also stolen) sorry
 
 
 def add_band_gap(archive, band_gap):
@@ -1889,7 +1890,8 @@ class SolarCellEQE(PlotSection):
         unit='mA / cm**2',
         shape=[],
         description="""
-        The integrated short circuit current density $J_{SC}$ from the product of the EQE spectrum
+        The integrated short circuit current density $J_{SC}$ from 
+        the product of the EQE spectrum
         with the *AM 1.5G* sun spectrum.
         """,
         a_eln=dict(component='NumberEditQuantity'),
@@ -1930,7 +1932,8 @@ class SolarCellEQE(PlotSection):
         shape=[],
         unit='eV',
         description="""
-        Standard deviation of the fitted Urbach energy parameter from the eqe in eV.
+        Standard deviation of the fitted 
+        Urbach energy parameter from the eqe in eV.
         """,
     )
 
@@ -1984,14 +1987,16 @@ class SolarCellEQE(PlotSection):
         type=np.dtype(np.float64),
         shape=['n_values'],
         unit='nanometer',
-        description='Interpolated/extrapolated wavelength array with *E<sub>u</sub>* of the eqe spectrum ',
+        description="""Interpolated/extrapolated 
+        wavelength array with *E<sub>u</sub>* of the eqe spectrum """,
     )
 
     photon_energy_array = Quantity(
         type=np.dtype(np.float64),
         shape=['n_values'],
         unit='eV',
-        description='Interpolated/extrapolated photon energy array with a *E<sub>u</sub>*  of the eqe spectrum',
+        description="""Interpolated/extrapolated photon energy array with a 
+        *E<sub>u</sub>*  of the eqe spectrum""",
     )
 
     def normalize(self, archive, logger):
