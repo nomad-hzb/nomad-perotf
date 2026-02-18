@@ -26,33 +26,45 @@ def get_mpp_data(filedata):
     file_type = identify_file_type(filedata)
 
     if file_type == 'labview':
-        df = pd.read_csv(
-            StringIO(filedata),
-            skiprows=0,
-            sep='\t',
-            # index_col=0,
-            engine='python',
-        )
+        # Parse header lines manually before using pandas
         header_dict = {}
-        for i, row in df.iterrows():
-            if 'Time Difference' in row[0]:
+        headerlines = 0
+        lines = filedata.split('\n')
+        
+        for i, line in enumerate(lines):
+            parts = line.split('\t')
+            
+            # Check if this is the data header line (starts with "Time Difference")
+            if len(parts) > 0 and 'Time Difference' in parts[0]:
                 headerlines = i
                 break
+            
+            # Try to detect datetime (should be in row 1 or 2)
+            # Look for a line that starts with a date pattern
+            if i == 1 and len(parts) >= 2:
+                # Try to parse as potential datetime
+                try:
+                    # Check if first part looks like a date
+                    if '-' in parts[0] and ':' in parts[1]:
+                        header_dict.update({'datetime': f'{parts[0]} {parts[1]}'})
+                        continue
+                except (IndexError, TypeError):
+                    pass
+            
+            # Parse other metadata (key-value pairs where col1=key, col2=value)
+            if len(parts) >= 2 and parts[0] and 'SPP measurement' not in parts[0] and 'Time Difference' not in parts[0]:
+                key = str(parts[0]).lower().replace(' ', '_').replace('[', '').replace(']', '')
+                try:
+                    header_dict.update({key: float(parts[1])})
+                except (ValueError, TypeError):
+                    header_dict.update({key: str(parts[1])})
 
-            if i == 0:
-                header_dict.update({'datetime': f'{row[0]} {row[1]}'})
-                continue
-            key = row[0].lower().replace(' ', '_')
-            try:
-                header_dict.update({key: float(row[1])})
-            except BaseException:
-                header_dict.update({key: row[1]})
-
+        # Read the actual data starting from the header line
         df = pd.read_csv(
             StringIO(filedata),
-            skiprows=range(headerlines + 2, headerlines + 3),
+            skiprows=list(range(headerlines)) + [headerlines + 1],  # Skip metadata and units row
             sep='\t',
-            header=headerlines + 1,
+            header=0,  # First row after skiprows is the header
         )
 
     elif file_type == 'python':
