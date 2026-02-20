@@ -4,7 +4,9 @@ import datetime
 import numpy as np
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
-from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin #Zeiss SEM
+from baseclasses.characterizations.electron_microscopy import (
+    SEM_Microscope_Merlin,
+)  # Zeiss SEM
 from baseclasses.chemical import Chemical
 from baseclasses.experimental_plan import ExperimentalPlan
 from baseclasses.helper.utilities import (
@@ -1251,6 +1253,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
 
         super().normalize(archive, logger)
 
+
 class peroTF_SEM(SEM_Microscope_Merlin, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1273,7 +1276,9 @@ class peroTF_SEM(SEM_Microscope_Merlin, EntryData):
         self.method = 'SEM'
         if not self.samples and self.detector_data:
             search_id = self.detector_data[0].split('.')[0]
-            set_sample_reference(archive, self, search_id, upload_id=archive.metadata.upload_id)
+            set_sample_reference(
+                archive, self, search_id, upload_id=archive.metadata.upload_id
+            )
         super().normalize(archive, logger)
 
 
