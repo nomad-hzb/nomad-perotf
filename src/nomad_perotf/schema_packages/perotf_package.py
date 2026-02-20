@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
 from baseclasses.characterizations import XRD
+from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin #Zeiss SEM
 from baseclasses.chemical import Chemical
 from baseclasses.experimental_plan import ExperimentalPlan
 from baseclasses.helper.utilities import (
@@ -1248,6 +1249,31 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                         logger.warning('Couldnt parse datetime')
                 get_jv_archive(jv_dict, self.data_file, self)
 
+        super().normalize(archive, logger)
+
+class peroTF_SEM(SEM_Microscope_Merlin, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'detector_data_folder',
+                'external_sample_url',
+            ],
+            properties=dict(order=['name', 'detector_data', 'samples']),
+        )
+    )
+
+    def normalize(self, archive, logger):
+        self.method = 'SEM'
+        if not self.samples and self.detector_data:
+            search_id = self.detector_data[0].split('.')[0]
+            set_sample_reference(archive, self, search_id, upload_id=archive.metadata.upload_id)
         super().normalize(archive, logger)
 
 
