@@ -1065,7 +1065,6 @@ class peroTF_MPPTracking(MPPTracking, EntryData):
                 'end_time',
                 'steps',
                 'instruments',
-                'results',
             ],
             properties=dict(order=['name', 'data_file', 'samples']),
         ),
