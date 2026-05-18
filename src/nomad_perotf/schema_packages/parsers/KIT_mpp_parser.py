@@ -363,9 +363,7 @@ def _populate_tflpuri_archive(header_dict, df, mpp_entitiy, mainfile=None):
     # power_density so the performance calculation is skipped entirely.
     power_col_check = _get_column(df, ['power density', 'power'])
     if power_col_check is not None:
-        finite_mask = np.isfinite(
-            pd.to_numeric(df[power_col_check], errors='coerce')
-        )
+        finite_mask = np.isfinite(pd.to_numeric(df[power_col_check], errors='coerce'))
         if finite_mask.any():
             df = df[finite_mask].reset_index(drop=True)
         else:
