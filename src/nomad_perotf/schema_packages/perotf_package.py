@@ -1086,7 +1086,7 @@ class peroTF_MPPTracking(MPPTracking, EntryData):
         shape=[],
         a_eln=dict(
             component='EnumEditQuantity',
-            props=dict(suggestions=['python', 'labview', 'puri']),
+            props=dict(suggestions=['python', 'labview', 'puri', 'tflpuri']),
         ),
     )
 
@@ -1555,7 +1555,7 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
         shape=[],
         a_eln=dict(
             component='EnumEditQuantity',
-            props=dict(suggestions=['python', 'labview', 'puri']),
+            props=dict(suggestions=['python', 'labview', 'puri', 'tflpuri']),
         ),
     )
 
