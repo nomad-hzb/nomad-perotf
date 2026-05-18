@@ -15,6 +15,8 @@ def identify_file_type(file_content):
     """
     if 'Singapore Solar Simulator, Python' in file_content:
         return 'python'
+    elif 'PURI IV Test Software Version' in file_content:
+        return 'tflpuri'
     elif '[Task information]' in file_content:
         return 'puri'
     elif 'SPP measurement' in file_content:
@@ -180,6 +182,39 @@ def get_mpp_data(filedata):
             on_bad_lines='skip',
         )
 
+    elif file_type == 'tflpuri':
+        header_dict = {}
+        lines = filedata.split('\n')
+        data_start = 0
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # The data header line starts with "Time(s)"
+            if stripped.startswith('Time(s)'):
+                data_start = i
+                break
+            if ': ' in stripped:
+                key, value = stripped.split(': ', 1)
+                key = (
+                    key.strip()
+                    .lower()
+                    .replace(' ', '_')
+                    .replace('(', '')
+                    .replace(')', '')
+                )
+                value = value.strip()
+                try:
+                    header_dict[key] = float(value)
+                except ValueError:
+                    header_dict[key] = value
+
+        df = pd.read_csv(
+            StringIO(filedata),
+            skiprows=data_start,
+            sep=',',
+            header=0,
+        )
+        df.columns = df.columns.str.strip()
+
     return header_dict, df, file_type
 
 
@@ -315,6 +350,88 @@ def _populate_puri_archive(header_dict, df, mpp_entitiy, mainfile=None):
     mpp_entitiy.properties = properties
 
 
+def _populate_tflpuri_archive(header_dict, df, mpp_entitiy, mainfile=None):
+    # Keep local pandas Series to avoid reading back pint Quantities from the
+    # entity (which would raise TypeError when passed to float()).
+    times_s = None
+    voltage_v = None
+    efficiency_pct = None
+
+    # Filter out rows where power density is non-finite (Inf/-Inf from device
+    # artefacts).  savgol_filter in the base-class normalizer requires a fully
+    # finite power_density array; if ALL rows are non-finite, skip setting
+    # power_density so the performance calculation is skipped entirely.
+    power_col_check = _get_column(df, ['power density', 'power'])
+    if power_col_check is not None:
+        finite_mask = np.isfinite(
+            pd.to_numeric(df[power_col_check], errors='coerce')
+        )
+        if finite_mask.any():
+            df = df[finite_mask].reset_index(drop=True)
+        else:
+            # No finite power values at all – do not set power_density so that
+            # MPPTracking.normalize() skips calculate_performance_parameters().
+            power_col_check = None
+
+    time_col = _get_column(df, ['time(s)', 'time'])
+    if time_col is not None:
+        times_s = pd.to_numeric(df[time_col], errors='coerce')
+        times_s = times_s - times_s.iloc[0]
+        mpp_entitiy.time = np.array(times_s)
+
+    voltage_col = _get_column(df, ['voltage(v)', 'voltage'])
+    if voltage_col is not None:
+        voltage_v = pd.to_numeric(df[voltage_col], errors='coerce')
+        mpp_entitiy.voltage = voltage_v.to_numpy()
+
+    current_col = _get_column(df, ['current density', 'current'])
+    if current_col is not None:
+        mpp_entitiy.current_density = pd.to_numeric(
+            df[current_col], errors='coerce'
+        ).to_numpy()
+
+    power_col = power_col_check
+    if power_col is not None:
+        power_mw = pd.to_numeric(df[power_col], errors='coerce')
+        mpp_entitiy.power_density = np.array(power_mw)
+        illumination = get_parameter(header_dict, 'illumination_intensity_mw/cm2')
+        if illumination and float(illumination) > 0:
+            efficiency_pct = power_mw / float(illumination) * 100
+            mpp_entitiy.efficiency = np.array(efficiency_pct)
+
+    _set_common_data_file(mpp_entitiy, mainfile)
+
+    try:
+        datetime_str = get_parameter(header_dict, 'test_start_time')
+        if datetime_str:
+            datetime_object = datetime.strptime(str(datetime_str), '%Y%m%d_%H:%M:%S')
+            mpp_entitiy.datetime = datetime_object.strftime('%Y-%m-%d %H:%M:%S.%f')
+    except (ValueError, TypeError):
+        pass
+
+    properties = MPPTrackingProperties()
+    properties.perturbation_frequency = get_parameter(
+        header_dict, 'power_monitoring_interval_s'
+    )
+    step_mv = get_parameter(header_dict, 'perturbation_step_size_mv')
+    if step_mv is not None:
+        properties.perturbation_voltage = float(step_mv) / 1000.0
+
+    if times_s is not None and len(times_s) > 0:
+        valid_times = times_s[np.isfinite(times_s)]
+        if len(valid_times) > 0:
+            properties.time = float(valid_times.iloc[-1])
+    if efficiency_pct is not None and len(efficiency_pct) > 0:
+        valid_pce = efficiency_pct[np.isfinite(efficiency_pct)]
+        if len(valid_pce) > 0:
+            properties.last_pce = float(valid_pce.iloc[-1])
+    if voltage_v is not None and len(voltage_v) > 0:
+        valid_v = voltage_v[np.isfinite(voltage_v)]
+        if len(valid_v) > 0:
+            properties.last_vmpp = float(valid_v.iloc[-1])
+    mpp_entitiy.properties = properties
+
+
 def _populate_python_archive(header_dict, df, mpp_entitiy, mainfile=None):
     mpp_entitiy.time = np.array(df['Time'])
     mpp_entitiy.power_density = np.array(df['Power'])
@@ -333,6 +450,8 @@ def get_mpp_archive(header_dict, file_type, df, mpp_entitiy, mainfile=None):
         _populate_labview_archive(header_dict, df, mpp_entitiy, mainfile=mainfile)
     elif file_type == 'puri':
         _populate_puri_archive(header_dict, df, mpp_entitiy, mainfile=mainfile)
+    elif file_type == 'tflpuri':
+        _populate_tflpuri_archive(header_dict, df, mpp_entitiy, mainfile=mainfile)
     elif file_type == 'python':
         _populate_python_archive(header_dict, df, mpp_entitiy, mainfile=mainfile)
 
