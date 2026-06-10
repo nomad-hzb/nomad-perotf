@@ -1403,6 +1403,12 @@ class peroTF_AbsPLResult(AbsPLResult):
         a_eln=dict(component='NumberEditQuantity', label='Implied Voc HET'),
     )
 
+    laser_intensity_suns = Quantity(
+        type=np.float64,
+        description='Laser intensity in suns for this sweep step.',
+        a_eln=dict(component='NumberEditQuantity', label='Laser intensity (suns)'),
+    )
+
 
 class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
     m_def = Section(label='Absolute PL Measurement')

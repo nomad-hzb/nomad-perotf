@@ -135,11 +135,17 @@ def parse_multiple_abspl(filedata):
     metadata.index = metadata.index.str.strip()
     data = pd.read_csv(StringIO(data_str.strip()), sep='\t', header=None, skiprows=2)
 
+    PER_MEASUREMENT_SETTINGS = {'laser_intensity_suns'}
+
     settings_vals = {}
     results = {}
     for key in metadata.index:
         if key in header_map_settings:
-            settings_vals[header_map_settings[key]] = metadata.loc[key][1]
+            mapped = header_map_settings[key]
+            if mapped in PER_MEASUREMENT_SETTINGS:
+                results[mapped] = metadata.loc[key]
+            else:
+                settings_vals[mapped] = metadata.loc[key][1]
         if key in header_map_result:
             results[header_map_result[key]] = metadata.loc[key]
 
