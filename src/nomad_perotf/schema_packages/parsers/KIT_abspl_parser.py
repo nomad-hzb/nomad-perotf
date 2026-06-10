@@ -13,8 +13,10 @@ header_map_settings = {
     'EQE @ laser wavelength': 'eqe_laser_wavelength',
     'Laser spot size (cm²)': 'laser_spot_size',
     'Laser spot size (cm�)': 'laser_spot_size',
+    'Laser spot size (cm )': 'laser_spot_size',
     'Subcell area (cm²)': 'subcell_area',
     'Subcell area (cm�)': 'subcell_area',
+    'Subcell area (cm )': 'subcell_area',
     'Subcell': 'subcell_description',
 }
 header_map_result = {
@@ -130,6 +132,7 @@ def parse_multiple_abspl(filedata):
     metadata = pd.read_csv(
         StringIO(metadata_str.strip()), sep='\t', header=None, index_col=0
     )
+    metadata.index = metadata.index.str.strip()
     data = pd.read_csv(StringIO(data_str.strip()), sep='\t', header=None, skiprows=2)
 
     settings_vals = {}
