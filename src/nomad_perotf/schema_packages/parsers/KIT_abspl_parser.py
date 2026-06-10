@@ -31,9 +31,13 @@ header_map_result = {
 
 def parse_abspl_data(data_file, archive, logger):
     """Parses the AbsPL data file and returns extracted settings and spectral arrays."""
+    from baseclasses.helper.utilities import get_encoding
+
+    with archive.m_context.raw_file(data_file, mode='rb') as f:
+        encoding = get_encoding(f) or 'cp1252'
     with archive.m_context.raw_file(data_file, mode='rb') as f:
         raw_bytes = f.read()
-    text = raw_bytes.decode('cp1252', errors='replace')
+    text = raw_bytes.decode(encoding, errors='replace')
     lines = text.splitlines()
     logger.debug('Read data file lines', file=data_file, total_lines=len(lines))
 
