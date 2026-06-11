@@ -135,7 +135,7 @@ def parse_multiple_abspl(filedata):
     metadata.index = metadata.index.str.strip()
     data = pd.read_csv(StringIO(data_str.strip()), sep='\t', header=None, skiprows=2)
 
-    PER_MEASUREMENT_SETTINGS = {'laser_intensity_suns'} #
+    PER_MEASUREMENT_SETTINGS = {'laser_intensity_suns'}
 
     settings_vals = {}
     results = {}
