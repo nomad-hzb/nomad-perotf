@@ -231,6 +231,12 @@ def calculatePVparametersFromJV(jvData, cellArea=0.105, lineFittingDataPoints=20
 
 
 def get_jv_data(filedata):
+    def _first_sign_change_index(values):
+        indices = np.where(np.diff(np.signbit(values)))[0]
+        if len(indices) == 0:
+            return None
+        return int(indices[0])
+
     file_type = identify_file_type(filedata)
     jv_dict = {}
 
@@ -257,18 +263,16 @@ def get_jv_data(filedata):
 
         df_curves = df_curves.dropna(how='all', axis=1)
 
-        voc_help = df_curves.iloc[:, 0][
-            np.where(np.diff(np.signbit(df_curves.iloc[:, 1])))[0][0].item()
-        ]
-        jsc_help = df_curves.iloc[:, 1][
-            np.where(np.diff(np.signbit(df_curves.iloc[:, 0])))[0][0].item()
-        ]
+        voc_idx = _first_sign_change_index(df_curves.iloc[:, 1].to_numpy())
+        jsc_idx = _first_sign_change_index(df_curves.iloc[:, 0].to_numpy())
+        voc_help = df_curves.iloc[voc_idx, 0] if voc_idx is not None else np.nan
+        jsc_help = df_curves.iloc[jsc_idx, 1] if jsc_idx is not None else np.nan
 
-        if voc_help < 0:
+        if np.isfinite(voc_help) and voc_help < 0:
             #     voltage = -voltage
             df_curves['Voltage [V]'] = df_curves['Voltage [V]'] * -1
 
-        if jsc_help < 0:
+        if np.isfinite(jsc_help) and jsc_help < 0:
             #     current = -current
             j_columns = [
                 'Current density [1] [mA/cm^2]',
@@ -335,18 +339,16 @@ def get_jv_data(filedata):
 
         df_curves = df_curves.dropna(how='all', axis=1)
 
-        voc_help = df_curves.iloc[:, 0][
-            np.where(np.diff(np.signbit(df_curves.iloc[:, 1])))[0][0].item()
-        ]
-        jsc_help = df_curves.iloc[:, 1][
-            np.where(np.diff(np.signbit(df_curves.iloc[:, 0])))[0][0].item()
-        ]
+        voc_idx = _first_sign_change_index(df_curves.iloc[:, 1].to_numpy())
+        jsc_idx = _first_sign_change_index(df_curves.iloc[:, 0].to_numpy())
+        voc_help = df_curves.iloc[voc_idx, 0] if voc_idx is not None else np.nan
+        jsc_help = df_curves.iloc[jsc_idx, 1] if jsc_idx is not None else np.nan
 
-        if voc_help < 0:
+        if np.isfinite(voc_help) and voc_help < 0:
             #     voltage = -voltage
             df_curves['Voltage'] = df_curves['Voltage'] * -1
 
-        if jsc_help < 0:
+        if np.isfinite(jsc_help) and jsc_help < 0:
             #     current = -current
             j_columns = [
                 'CurrentDensity',
