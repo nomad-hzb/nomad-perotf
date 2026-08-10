@@ -1387,6 +1387,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
             electronic = ElectronicProperties(band_gap=band_gaps_result)
             archive.results.properties.electronic = electronic
 
+
 class peroTF_XRD_XY(XRD, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1419,13 +1420,20 @@ class peroTF_XRD_XY(XRD, EntryData):
 
         if not self.samples and self.data_file:
             search_id = self.data_file.split('.')[0]
-            set_sample_reference(archive, self, search_id, upload_id=archive.metadata.upload_id)
+            set_sample_reference(
+                archive, self, search_id, upload_id=archive.metadata.upload_id
+            )
 
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'tr') as f:
-                if os.path.splitext(self.data_file)[-1].lower() == '.xy' and self.data is None:
+                if (
+                    os.path.splitext(self.data_file)[-1].lower() == '.xy'
+                    and self.data is None
+                ):
                     file_content = f.read()
-                    lines = [li.strip() for li in file_content.splitlines() if li.strip()]
+                    lines = [
+                        li.strip() for li in file_content.splitlines() if li.strip()
+                    ]
                     skiprows = 1 if lines and 'Id' in lines[0] else 0
 
                     # Detect decimal marker from first data line
@@ -1445,7 +1453,9 @@ class peroTF_XRD_XY(XRD, EntryData):
                     data[1] = pd.to_numeric(data[1], errors='coerce')
                     data = data.dropna(subset=[0, 1])
                     if not data.empty:
-                        self.data = XRDData(angle=data[0].values, intensity=data[1].values)
+                        self.data = XRDData(
+                            angle=data[0].values, intensity=data[1].values
+                        )
         super().normalize(archive, logger)
 
 
