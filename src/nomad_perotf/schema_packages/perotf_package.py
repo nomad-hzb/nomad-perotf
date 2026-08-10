@@ -1,9 +1,11 @@
 # from nomad.units import ureg
 import datetime
+import os
+from io import StringIO
 
 import numpy as np
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
-from baseclasses.characterizations import XRD
+from baseclasses.characterizations import XRD, XRDData
 from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin,
 )  # Zeiss SEM
@@ -1384,6 +1386,67 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 )
             electronic = ElectronicProperties(band_gap=band_gaps_result)
             archive.results.properties.electronic = electronic
+
+class peroTF_XRD_XY(XRD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'metadata_file',
+                'shifted_data',
+                'identifier',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        ),
+        a_plot=[
+            {
+                'x': ['data/angle'],
+                'y': ['data/intensity'],
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
+                    'xaxis': {'fixedrange': False},
+                },
+            },
+        ],
+    )
+
+    def normalize(self, archive, logger):
+        import pandas as pd
+
+        if not self.samples and self.data_file:
+            search_id = self.data_file.split('.')[0]
+            set_sample_reference(archive, self, search_id, upload_id=archive.metadata.upload_id)
+
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, 'tr') as f:
+                if os.path.splitext(self.data_file)[-1].lower() == '.xy' and self.data is None:
+                    file_content = f.read()
+                    lines = [li.strip() for li in file_content.splitlines() if li.strip()]
+                    skiprows = 1 if lines and 'Id' in lines[0] else 0
+
+                    # Detect decimal marker from first data line
+                    sample_line = lines[skiprows] if skiprows < len(lines) else lines[0]
+                    decimal = ',' if ',' in sample_line else '.'
+
+                    data = pd.read_csv(
+                        StringIO(file_content),
+                        sep=r' |\t',
+                        decimal=decimal,
+                        header=None,
+                        skiprows=skiprows,
+                        engine='python',
+                    )
+                    data = data.dropna(subset=[0, 1])
+                    data[0] = pd.to_numeric(data[0], errors='coerce')
+                    data[1] = pd.to_numeric(data[1], errors='coerce')
+                    data = data.dropna(subset=[0, 1])
+                    if not data.empty:
+                        self.data = XRDData(angle=data[0].values, intensity=data[1].values)
+        super().normalize(archive, logger)
 
 
 # big thx to hzb (micha and edgar)
