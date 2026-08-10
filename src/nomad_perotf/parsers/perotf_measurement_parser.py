@@ -49,6 +49,7 @@ from nomad_perotf.schema_packages.perotf_package import (
     peroTF_SEM,
     peroTF_TFL_GammaBox_EQEmeasurement,
     peroTF_UVvisMeasurement,
+    peroTF_XRD_XY,
 )  # its the copied one from FAIRMAT
 
 """
@@ -102,6 +103,8 @@ class PeroTFParser(MatchingParser):
             entry = peroTF_MPPTracking()
         if mainfile_split[-1] in ['csv'] and mainfile_split[-2] == 'uvvis':
             entry = peroTF_UVvisMeasurement()
+        if mainfile_split[-1] in ['xy'] and mainfile_split[-2] == 'xrd':
+            entry = peroTF_XRD_XY()
         if (
             mainfile_split[-1].lower() in ['tif', 'tiff']
             and mainfile_split[-2].lower() == 'sem'
