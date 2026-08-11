@@ -83,7 +83,14 @@ class PeroTFParser(MatchingParser):
 
         if mainfile_split[-1] == 'dat' and mainfile_split[-2] == 'eqe':
             # Bentham EQE system
-            header_lines = 63
+            with open(mainfile, encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                if 'Version: 4.3.0.7' in first_line:
+                    header_lines = 63
+                elif 'Version: 4.14.2' in first_line:
+                    header_lines = 54
+                else:
+                    header_lines = 0
             sc_eqe = SolarCellEQE()
             sc_eqe.eqe_data_file = os.path.basename(mainfile)
             sc_eqe.header_lines = header_lines
