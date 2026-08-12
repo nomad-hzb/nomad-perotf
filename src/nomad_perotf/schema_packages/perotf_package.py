@@ -2046,6 +2046,15 @@ class SolarCellEQE(PlotSection):
         """,
     )
 
+    measurement_programm = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(suggestions=['benthamV4307', 'benthamV4142', 'enlitec']),
+        ),
+    )
+
     def derive_n_values(self):
         if self.eqe_array is not None:
             return len(self.eqe_array)
@@ -2121,6 +2130,16 @@ class SolarCellEQE(PlotSection):
                 eqe_dict = EQEAnalyzer(
                     f.name, header_lines=self.header_lines
                 ).eqe_dict()
+                header_lines_help = self.header_lines
+                self.measurement_programm = (
+                    'benthamV4307'
+                    if header_lines_help == 63
+                    else 'benthamV4142'
+                    if header_lines_help == 54
+                    else 'enlitec'
+                    if header_lines_help == 5
+                    else 'unknown'
+                )
                 self.measured = True
                 self.bandgap_eqe = eqe_dict['bandgap']
                 self.integrated_jsc = eqe_dict['jsc'] * ureg('A/m**2')
