@@ -2126,11 +2126,20 @@ class SolarCellEQE(PlotSection):
                 from nomad_perotf.schema_packages.parsers.KIT_eqe_parser import (
                     EQEAnalyzer,
                 )
+
                 eqe_dict = EQEAnalyzer(
                     f.name, header_lines=self.header_lines
                 ).eqe_dict()
                 header_lines_help = self.header_lines
-                self.measurement_programm = 'benthamV4307' if header_lines_help == 63 else 'benthamV4142' if header_lines_help == 54 else 'enlitec' if header_lines_help == 5 else 'unknown'
+                self.measurement_programm = (
+                    'benthamV4307'
+                    if header_lines_help == 63
+                    else 'benthamV4142'
+                    if header_lines_help == 54
+                    else 'enlitec'
+                    if header_lines_help == 5
+                    else 'unknown'
+                )
                 self.measured = True
                 self.bandgap_eqe = eqe_dict['bandgap']
                 self.integrated_jsc = eqe_dict['jsc'] * ureg('A/m**2')
