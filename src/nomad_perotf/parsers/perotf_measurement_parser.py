@@ -110,7 +110,7 @@ class PeroTFParser(MatchingParser):
             entry = peroTF_MPPTracking()
         if mainfile_split[-1] in ['csv'] and mainfile_split[-2] == 'uvvis':
             entry = peroTF_UVvisMeasurement()
-        if mainfile_split[-1] in ['xy'] and mainfile_split[-2] == 'xrd':
+        if mainfile_split[-1] in ['xy', 'brml'] and mainfile_split[-2] == 'xrd':
             entry = peroTF_XRD_XY()
         if (
             mainfile_split[-1].lower() in ['tif', 'tiff']

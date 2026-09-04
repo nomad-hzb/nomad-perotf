@@ -1416,7 +1416,7 @@ class peroTF_XRD_XY(XRD, EntryData):
     )
 
     def normalize(self, archive, logger):
-        import pandas as pd
+        from nomad_perotf.schema_packages.parsers.KIT_xrd_parser import parse_xrd_data
 
         if not self.samples and self.data_file:
             search_id = self.data_file.split('.')[0]
@@ -1424,38 +1424,16 @@ class peroTF_XRD_XY(XRD, EntryData):
                 archive, self, search_id, upload_id=archive.metadata.upload_id
             )
 
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'tr') as f:
-                if (
-                    os.path.splitext(self.data_file)[-1].lower() == '.xy'
-                    and self.data is None
-                ):
+        if self.data_file and self.data is None:
+            try:
+                with archive.m_context.raw_file(self.data_file, 'rb') as f:
                     file_content = f.read()
-                    lines = [
-                        li.strip() for li in file_content.splitlines() if li.strip()
-                    ]
-                    skiprows = 1 if lines and 'Id' in lines[0] else 0
-
-                    # Detect decimal marker from first data line
-                    sample_line = lines[skiprows] if skiprows < len(lines) else lines[0]
-                    decimal = ',' if ',' in sample_line else '.'
-
-                    data = pd.read_csv(
-                        StringIO(file_content),
-                        sep=r' |\t',
-                        decimal=decimal,
-                        header=None,
-                        skiprows=skiprows,
-                        engine='python',
-                    )
-                    data = data.dropna(subset=[0, 1])
-                    data[0] = pd.to_numeric(data[0], errors='coerce')
-                    data[1] = pd.to_numeric(data[1], errors='coerce')
-                    data = data.dropna(subset=[0, 1])
-                    if not data.empty:
-                        self.data = XRDData(
-                            angle=data[0].values, intensity=data[1].values
-                        )
+                file_name = os.path.basename(self.data_file)
+                self.data = parse_xrd_data(file_content, file_name)
+            except (RuntimeError, ValueError, TypeError) as exc:
+                logger.warning(
+                    'Failed to parse XRD data file %s: %s', self.data_file, exc
+                )
         super().normalize(archive, logger)
 
 
