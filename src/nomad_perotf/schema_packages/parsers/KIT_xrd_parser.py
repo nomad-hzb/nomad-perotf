@@ -4,7 +4,6 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
-
 from baseclasses.characterizations import XRDData
 
 

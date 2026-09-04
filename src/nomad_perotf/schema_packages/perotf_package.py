@@ -1,11 +1,10 @@
 # from nomad.units import ureg
 import datetime
 import os
-from io import StringIO
 
 import numpy as np
 from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
-from baseclasses.characterizations import XRD, XRDData
+from baseclasses.characterizations import XRD
 from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin,
 )  # Zeiss SEM
