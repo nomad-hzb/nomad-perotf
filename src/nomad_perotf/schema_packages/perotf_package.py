@@ -1703,14 +1703,14 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
             jv_dict = self.map_jv_measurement(self.data_file, archive, logger)
             if self.data_file_reverse:
                 jv_dict['jv_curve'][0]['name'] = 'Forward Scan'
-            get_jv_archive(jv_dict, self.data_file, self)
+            get_jv_archive(jv_dict, self.data_file, self, archive, logger)
 
         if self.data_file and self.data_file_reverse:
             jv_dict_ref = self.map_jv_measurement(
                 self.data_file_reverse, archive, logger
             )
             jv_dict_ref['jv_curve'][0]['name'] = 'Reverse Scan'
-            get_jv_archive(jv_dict_ref, self.data_file_reverse, self, append=True)
+            get_jv_archive(jv_dict_ref, self.data_file_reverse, self, archive, logger, append=True)
 
         super().normalize(archive, logger)
 
