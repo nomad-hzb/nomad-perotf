@@ -1051,7 +1051,7 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                     except Exception:
                         logger.warning('Couldnt parse datetime')
 
-                get_jv_archive(jv_dict, self.data_file, self)
+                get_jv_archive(jv_dict, self.data_file, self, archive, logger)
 
         super().normalize(archive, logger)
 
@@ -1249,7 +1249,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                         )
                     except Exception:
                         logger.warning('Couldnt parse datetime')
-                get_jv_archive(jv_dict, self.data_file, self)
+                get_jv_archive(jv_dict, self.data_file, self, archive, logger)
 
         super().normalize(archive, logger)
 
@@ -1710,7 +1710,9 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                 self.data_file_reverse, archive, logger
             )
             jv_dict_ref['jv_curve'][0]['name'] = 'Reverse Scan'
-            get_jv_archive(jv_dict_ref, self.data_file_reverse, self, archive, logger, append=True)
+            forward_curves = list(self.jv_curve)
+            get_jv_archive(jv_dict_ref, self.data_file_reverse, self, archive, logger)
+            self.jv_curve = forward_curves + list(self.jv_curve)
 
         super().normalize(archive, logger)
 
