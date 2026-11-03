@@ -1,6 +1,8 @@
+import datetime
 import os
 
 import nomad
+import pandas as pd
 import pytest
 from nomad.client import normalize_all, parse
 
@@ -149,3 +151,98 @@ def test_mpp_files(monkeypatch):
     assert archive.metadata.entry_type == 'peroTF_CR_SolSimBox_MPPTracking'
 
     delete_json()
+
+
+def test_experiment_file_all_processes(monkeypatch):
+    """Every column Excel_creator writes ends up in the entries the parser creates."""
+    file_name = os.path.join('tests', 'data', 'parsertest_all_processes.xlsx')
+    excel = pd.read_excel(file_name, header=[0, 1])
+
+    def cell(group, label):
+        return excel[group][label].iloc[0]
+
+    set_monkey_patch(monkeypatch)
+    try:
+        parse(file_name)
+        entries = {
+            file: parse(os.path.join('tests', 'data', file))[0].data
+            for file in os.listdir(os.path.join('tests', 'data'))
+            if file.endswith('.archive.json')
+        }
+    finally:
+        delete_json()
+
+    def entry(prefix):
+        (data,) = [data for file, data in entries.items() if file.startswith(prefix)]
+        return data
+
+    sample = entries['KIT_PARSERTEST_20261103_0_0_1.archive.json']
+    assert sample.datetime.date() == datetime.date(2026, 11, 3)
+    multijunction = '21: Multijunction Info'
+    assert sample.recombination_layer == cell(multijunction, 'Recombination Layer')
+    assert sample.multijunction_notes == cell(multijunction, 'Notes')
+
+    substrate = entry('0_substrate')
+    assert substrate.number_of_pixels == cell('Experiment Info', 'Number of pixels')
+    assert substrate.pixel_area.to('cm**2').magnitude == pytest.approx(
+        cell('Experiment Info', 'Pixel area')
+    )
+
+    spin_coating = entry('3_0_spin_coating')
+    assert spin_coating.spin_delay.to('s').magnitude == pytest.approx(
+        cell('3: Spin Coating', 'Spin Delay [s]')
+    )
+
+    gas_quenching = entry('8_0_inkjet_printing').quenching
+    assert gas_quenching.gas == cell('8: Inkjet Printing', 'Gas')
+    assert gas_quenching.flow_rate.to('ml/s').magnitude == pytest.approx(
+        cell('8: Inkjet Printing', 'Gas quenching flow rate [ml/s]')
+    )
+    vacuum_quenching = entry('9_0_inkjet_printing').quenching
+    assert vacuum_quenching.duration.to('s').magnitude == pytest.approx(
+        cell('9: Inkjet Printing', 'Vacuum quenching duration [s]')
+    )
+
+    assert len(entry('10_0_evaporation').organic_evaporation) == 1
+    assert len(entry('11_0_evaporation').inorganic_evaporation) == 1
+
+    for group, prefix, co_evaporation, materials in [
+        ('12: Co-Evaporation', '12_0_coevaporation', True, 5),
+        ('13: Seq-Evaporation', '13_0_evaporation', False, 3),
+    ]:
+        evaporation = entry(prefix)
+        assert evaporation.co_evaporation is co_evaporation
+        sources = evaporation.perovskite_evaporation
+        assert [s.chemical_2.name for s in sources] == [
+            cell(group, f'Material name {n}') for n in range(1, materials + 1)
+        ]
+        for n, source in enumerate(sources, start=1):
+            assert source.thickness.to('nm').magnitude == pytest.approx(
+                cell(group, f'Thickness {n} [nm]')
+            )
+            assert float(source.tooling_factor) == pytest.approx(
+                cell(group, f'Tooling factor {n}')
+            )
+
+    lamination = entry('18_0_lamination')
+    group = '18: Lamination'
+    assert lamination.interface == cell(group, 'Interface')
+    assert lamination.settings.temperature.to('degC').magnitude == pytest.approx(
+        cell(group, 'Temperature during process[°C]')
+    )
+    assert lamination.settings.time.to('s').magnitude == pytest.approx(
+        cell(group, 'Time lamination [s]')
+    )
+    assert lamination.settings.total_time.to('s').magnitude == pytest.approx(
+        cell(group, 'Total time [s]')
+    )
+    assert lamination.settings.stamp_material == cell(group, 'Stamp 1 Material')
+    assert lamination.settings.stamp_2_material == cell(group, 'Stamp 2 Material')
+    assert lamination.settings.chamber_atmosphere == cell(
+        group, 'Athmosphere in chamber'
+    )
+    assert lamination.atmosphere.relative_humidity == pytest.approx(
+        cell(group, 'Humidity [%%rel]')
+    )
+    assert lamination.homogeneously_pressed is True
+    assert lamination.successful_adhesion is True
