@@ -26,6 +26,7 @@ Created on Fri Sep 27 09:08:03 2024
 import pandas as pd
 from baseclasses.helper.solar_cell_batch_mapping import (
     get_reference,
+    get_value,
     map_annealing_class,
     map_atomic_layer_deposition,
     map_basic_sample,
@@ -33,12 +34,8 @@ from baseclasses.helper.solar_cell_batch_mapping import (
     map_cleaning,
     map_close_space_sublimation,
     map_dip_coating,
-    map_evaporation,
     map_generic,
-    map_inkjet_printing,
-    map_lamination,
     map_sdc,
-    map_spin_coating,
     map_sputtering,
     map_substrate,
 )
@@ -55,6 +52,12 @@ from nomad.metainfo import (
 )
 from nomad.parsing import MatchingParser
 
+from nomad_perotf.parsers.perotf_mapping import (
+    map_evaporation,
+    map_inkjet_printing,
+    map_lamination,
+    map_spin_coating,
+)
 from nomad_perotf.schema_packages.perotf_package import (
     peroTF_ALD,
     peroTF_Batch,
@@ -104,6 +107,11 @@ class PeroTFExperimentParser(MatchingParser):
         # xls = pd.ExcelFile(mainfile)
         df = pd.read_excel(mainfile, header=[0, 1])
         df = df[~df['Experiment Info']['Nomad ID'].isna()]
+        if ('Experiment Info', 'Date') in df.columns:
+            # pandas reads 20261103 as 20261103.0 once a cell of the column is empty
+            df[('Experiment Info', 'Date')] = df[('Experiment Info', 'Date')].map(
+                lambda d: str(int(d)) if isinstance(d, float) and d.is_integer() else d
+            )
         sample_ids = df['Experiment Info']['Nomad ID'].dropna().to_list()
         batch_id = '_'.join(sample_ids[0].split('_')[:-1])
         archives = [map_batch(sample_ids, batch_id, upload_id, peroTF_Batch)]
@@ -115,6 +123,8 @@ class PeroTFExperimentParser(MatchingParser):
             'Substrate conductive layer',
             'Notes',
             'Bottom Cell Name',
+            'Number of pixels',
+            'Pixel area',
         ]
         substrates_col = [
             s for s in substrates_col if s in df['Experiment Info'].columns
@@ -130,16 +140,32 @@ class PeroTFExperimentParser(MatchingParser):
 
         def find_substrate(d):
             for s in substrates:
-                if d.equals(s[1]):
+                # pandas 3 gives an all-text row dtype str, equals compares dtypes
+                if d.astype('object').equals(s[1].astype('object')):
                     return s[0]
 
+        multijunction_col = next(
+            (
+                c
+                for c in df.columns.get_level_values(0).unique()
+                if 'Multijunction Info' in c
+            ),
+            None,
+        )
         for i, row in df['Experiment Info'].iterrows():
             if pd.isna(row).all():
                 continue
             substrate_name = find_substrate(row[substrates_col]) + '.archive.json'
-            archives.append(
-                map_basic_sample(row, substrate_name, upload_id, peroTF_Sample)
-            )
+            sample = map_basic_sample(row, substrate_name, upload_id, peroTF_Sample)
+            if multijunction_col:
+                multijunction = df.loc[i, multijunction_col]
+                sample[1].recombination_layer = get_value(
+                    multijunction, 'Recombination Layer', None, False
+                )
+                sample[1].multijunction_notes = get_value(
+                    multijunction, 'Notes', None, False
+                )
+            archives.append(sample)
 
         for i, col in enumerate(df.columns.get_level_values(0).unique()):
             if col == 'Experiment Info':
@@ -183,9 +209,6 @@ class PeroTFExperimentParser(MatchingParser):
                     continue
 
                 if 'Evaporation' in col:
-                    coevaporation = False
-                    if 'Co-Evaporation' in col:
-                        coevaporation = True
                     archives.append(
                         map_evaporation(
                             i,
@@ -194,7 +217,8 @@ class PeroTFExperimentParser(MatchingParser):
                             row,
                             upload_id,
                             peroTF_Evaporation,
-                            coevaporation,
+                            col,
+                            logger,
                         )
                     )
 

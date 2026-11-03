@@ -19,6 +19,7 @@ from baseclasses.material_processes_misc import (
     Annealing,
     Cleaning,
     Lamination,
+    LaminationSettings,
     PlasmaCleaning,
     SolutionCleaning,
     UVCleaning,
@@ -216,6 +217,19 @@ class peroTF_Sample(SolcarCellSample, EntryData):
         label_quantity='sample_id',
     )
 
+    recombination_layer = Quantity(
+        type=str,
+        shape=[],
+        description='Recombination layer between the subcells of a multijunction.',
+        a_eln=dict(component='StringEditQuantity'),
+    )
+
+    multijunction_notes = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(component='RichTextEditQuantity'),
+    )
+
 
 class peroTF_Batch(Batch, EntryData):
     m_def = Section(
@@ -365,6 +379,17 @@ class peroTF_SpinCoating(SpinCoating, EntryData):
                     'annealing',
                 ]
             ),
+        ),
+    )
+
+    spin_delay = Quantity(
+        type=np.dtype(np.float64),
+        unit='s',
+        shape=[],
+        a_eln=dict(
+            component='NumberEditQuantity',
+            defaultDisplayUnit='s',
+            props=dict(minValue=0),
         ),
     )
 
@@ -953,11 +978,88 @@ class peroTF_InkjetPrinting(InkjetPrinting, EntryData):
 # %% ## Lamination
 
 
+class peroTF_LaminationSettings(LaminationSettings):
+    temperature_at_pressure_relief = Quantity(
+        type=np.dtype(np.float64),
+        unit='°C',
+        shape=[],
+        a_eln=dict(
+            component='NumberEditQuantity',
+            defaultDisplayUnit='°C',
+        ),
+    )
+
+    total_time = Quantity(
+        type=np.dtype(np.float64),
+        unit='s',
+        shape=[],
+        a_eln=dict(
+            component='NumberEditQuantity',
+            defaultDisplayUnit='s',
+            props=dict(minValue=0),
+        ),
+    )
+
+    chamber_atmosphere = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(component='StringEditQuantity'),
+    )
+
+    stamp_2_material = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(component='StringEditQuantity'),
+    )
+
+    stamp_2_thickness = Quantity(
+        type=np.dtype(np.float64),
+        unit='mm',
+        shape=[],
+        a_eln=dict(
+            component='NumberEditQuantity',
+            defaultDisplayUnit='mm',
+            props=dict(minValue=0),
+        ),
+    )
+
+    stamp_2_area = Quantity(
+        type=np.dtype(np.float64),
+        unit='mm**2',
+        shape=[],
+        a_eln=dict(
+            component='NumberEditQuantity',
+            defaultDisplayUnit='mm**2',
+            props=dict(minValue=0),
+        ),
+    )
+
+
 class peroTF_Lamination(Lamination, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['lab_id', 'users', 'end_time', 'steps', 'instruments', 'present']
         )
+    )
+
+    settings = SubSection(section_def=peroTF_LaminationSettings)
+
+    interface = Quantity(
+        type=str,
+        shape=[],
+        a_eln=dict(component='StringEditQuantity'),
+    )
+
+    homogeneously_pressed = Quantity(
+        type=bool,
+        shape=[],
+        a_eln=dict(component='BoolEditQuantity'),
+    )
+
+    successful_adhesion = Quantity(
+        type=bool,
+        shape=[],
+        a_eln=dict(component='BoolEditQuantity'),
     )
 
 
