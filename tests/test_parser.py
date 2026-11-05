@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from nomad.client import normalize_all, parse
 
+from nomad_perotf.parsers.perotf_batch_parser import drop_text_in_unit_columns
 from nomad_perotf.schema_packages.perotf_package import (
     peroTF_CR_SolSimBox_JVmeasurement,
     peroTF_CR_SolSimBox_MPPTracking,
@@ -246,3 +247,30 @@ def test_experiment_file_all_processes(monkeypatch):
     )
     assert lamination.homogeneously_pressed is True
     assert lamination.successful_adhesion is True
+
+
+def test_text_in_unit_columns_is_dropped():
+    """A unit column with text must not abort the upload; the text is dropped."""
+    df = pd.DataFrame(
+        {
+            ('Experiment Info', 'Nomad ID'): ['KIT_A_1', 'KIT_A_2'],
+            ('1: Cleaning UV-Ozone', 'Temperature 1 [°C]'): ['RT', 25],
+            ('1: Cleaning UV-Ozone', 'Solvent 1'): ['Water', 'IPA'],
+            ('2: Lamination', 'Homogeniously pressed [1/0]'): ['yes', 0],
+        }
+    )
+    warnings = []
+    logger = type('Logger', (), {'warning': lambda self, m: warnings.append(m)})()
+
+    cleaned = drop_text_in_unit_columns(df, logger)
+
+    temperature = cleaned[('1: Cleaning UV-Ozone', 'Temperature 1 [°C]')]
+    assert pd.isna(temperature[0])
+    assert temperature[1] == 25
+    assert list(cleaned[('1: Cleaning UV-Ozone', 'Solvent 1')]) == ['Water', 'IPA']
+    assert list(cleaned[('2: Lamination', 'Homogeniously pressed [1/0]')]) == [
+        'yes',
+        0,
+    ]
+    assert len(warnings) == 1
+    assert "'RT'" in warnings[0]
