@@ -28,7 +28,7 @@ class F:
 
 
 def set_monkey_patch(monkeypatch):
-    def mockreturn_search(*args):
+    def mockreturn_search(*args, **kwargs):
         return None
 
     monkeypatch.setattr(
@@ -101,6 +101,8 @@ def test_jv_files(monkeypatch):
     assert archive.metadata.entry_type == 'peroTF_JVmeasurement'
     assert archive.data.multijunction_position == 'mid'
     assert archive.data.measurement_programm == 'labview'
+    # the new GUI shows only figures, not the a_plot annotation
+    assert [f.label for f in archive.data.figures] == ['JV curves']
 
     archive.data = peroTF_CR_SolSimBox_JVmeasurement()
     archive.data.data_file = file
@@ -131,6 +133,7 @@ def test_jv_files_2(monkeypatch):
 
     assert archive.data
     assert len(archive.data.jv_curve) == 2
+    assert len(archive.data.figures[0].figure['data']) == 2
     delete_json()
 
 
@@ -142,6 +145,7 @@ def test_mpp_files(monkeypatch):
     assert archive.data
     assert archive.metadata.entry_type == 'peroTF_MPPTracking'
     assert archive.data.measurement_programm == 'labview'
+    assert [f.label for f in archive.data.figures] == ['MPP tracking']
 
     archive.data = peroTF_CR_SolSimBox_MPPTracking()
     archive.data.data_file = file
@@ -151,6 +155,41 @@ def test_mpp_files(monkeypatch):
     assert archive.data
     assert archive.metadata.entry_type == 'peroTF_CR_SolSimBox_MPPTracking'
 
+    delete_json()
+
+
+def test_eqe_files(monkeypatch):
+    archive = get_archive('AA00_C3_20.47mAcm-2.eqe.dat', monkeypatch)
+    normalize_all(archive)
+
+    assert archive.metadata.entry_type == 'peroTF_TFL_GammaBox_EQEmeasurement'
+    assert [f.label for f in archive.data.figures] == ['EQE']
+    delete_json()
+
+
+def test_uvvis_files(monkeypatch):
+    archive = get_archive('KIT_TeSt_20261105_0_0_1.uvvis.csv', monkeypatch)
+    normalize_all(archive)
+
+    assert archive.metadata.entry_type == 'peroTF_UVvisMeasurement'
+    (uvvis,) = archive.data.figures
+    assert uvvis.label == 'UV-vis'
+    assert [trace['name'] for trace in uvvis.figure['data']] == [
+        'reflection',
+        'transmission',
+        'absorption',
+    ]
+    delete_json()
+
+
+def test_xrd_files(monkeypatch):
+    archive = get_archive('KIT_TeSt_20261105_0_0_1.xrd.xy', monkeypatch)
+    normalize_all(archive)
+
+    assert archive.metadata.entry_type == 'peroTF_XRD_XY'
+    (xrd,) = archive.data.figures
+    assert xrd.label == 'XRD'
+    assert len(xrd.figure['data'][0]['x']) == len(archive.data.data.angle)
     delete_json()
 
 

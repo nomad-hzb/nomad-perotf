@@ -79,6 +79,14 @@ from nomad_luqy_plugin.schema_packages.schema_package import (
     AbsPLSettings,
 )
 
+from nomad_perotf.schema_packages.figures import (
+    eqe_figures,
+    jv_figures,
+    mpp_figures,
+    uvvis_figures,
+    xrd_figures,
+)
+
 m_package = SchemaPackage(name='peroTF', aliases=['perotf_s'])
 
 # %% ####################### Entities
@@ -1066,7 +1074,7 @@ class peroTF_Lamination(Lamination, EntryData):
 # %%####################################### Measurements
 
 
-class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
+class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1094,17 +1102,6 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'jv_curve/:/voltage',
-                'y': 'jv_curve/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     multijunction_position = Quantity(
@@ -1156,9 +1153,10 @@ class peroTF_CR_SolSimBox_JVmeasurement(JVMeasurement, EntryData):
                 get_jv_archive(jv_dict, self.data_file, self, archive, logger)
 
         super().normalize(archive, logger)
+        self.figures = jv_figures(self.jv_curve)
 
 
-class peroTF_MPPTracking(MPPTracking, EntryData):
+class peroTF_MPPTracking(MPPTracking, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1171,17 +1169,6 @@ class peroTF_MPPTracking(MPPTracking, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples']),
         ),
-        a_plot=[
-            {
-                'x': 'time',
-                'y': ['power_density', 'voltage'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     measurement_programm = Quantity(
@@ -1216,9 +1203,10 @@ class peroTF_MPPTracking(MPPTracking, EntryData):
                 self.measurement_programm = file_type
                 get_mpp_archive(mpp_dict, file_type, data, self)
         super().normalize(archive, logger)
+        self.figures = mpp_figures(self)
 
 
-class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
+class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1232,17 +1220,6 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples']),
         ),
-        a_plot=[
-            {
-                'x': 'time',
-                'y': ['power_density', 'voltage'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1263,9 +1240,10 @@ class peroTF_CR_SolSimBox_MPPTracking(MPPTracking, EntryData):
                 mpp_dict, data, file_type = get_mpp_data(f.read())
                 get_mpp_archive(mpp_dict, file_type, data, self)
         super().normalize(archive, logger)
+        self.figures = mpp_figures(self)
 
 
-class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
+class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1293,17 +1271,6 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'jv_curve/:/voltage',
-                'y': 'jv_curve/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     multijunction_position = Quantity(
@@ -1354,6 +1321,7 @@ class peroTF_TFL_GammaBox_JVmeasurement(JVMeasurement, EntryData):
                 get_jv_archive(jv_dict, self.data_file, self, archive, logger)
 
         super().normalize(archive, logger)
+        self.figures = jv_figures(self.jv_curve)
 
 
 class peroTF_SEM(SEM_Microscope_Merlin, EntryData):
@@ -1384,7 +1352,7 @@ class peroTF_SEM(SEM_Microscope_Merlin, EntryData):
         super().normalize(archive, logger)
 
 
-class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
+class peroTF_UVvisMeasurement(UVvisMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(  # i guess that wont change?
             hide=[
@@ -1413,17 +1381,6 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'measurements/:/wavelength',
-                'y': 'measurements/:/intensity',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     bandgaps_uvvis = Quantity(
@@ -1472,6 +1429,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
                 self.measurements = uvvis_data
 
         super().normalize(archive, logger)
+        self.figures = uvvis_figures(self.measurements)
         if self.bandgaps_uvvis is not None and len(self.bandgaps_uvvis) > 0:
             if not archive.results:
                 archive.results = Results()
@@ -1489,7 +1447,7 @@ class peroTF_UVvisMeasurement(UVvisMeasurement, EntryData):
             archive.results.properties.electronic = electronic
 
 
-class peroTF_XRD_XY(XRD, EntryData):
+class peroTF_XRD_XY(XRD, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1504,16 +1462,6 @@ class peroTF_XRD_XY(XRD, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples']),
         ),
-        a_plot=[
-            {
-                'x': ['data/angle'],
-                'y': ['data/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1536,6 +1484,7 @@ class peroTF_XRD_XY(XRD, EntryData):
                     'Failed to parse XRD data file %s: %s', self.data_file, exc
                 )
         super().normalize(archive, logger)
+        self.figures = xrd_figures(self.data)
 
 
 # big thx to hzb (micha and edgar)
@@ -1652,7 +1601,7 @@ class peroTF_AbsPLMeasurement(AbsPLMeasurement, EntryData):
         super().normalize(archive, logger)
 
 
-class peroTF_JVmeasurement(JVMeasurement, EntryData):
+class peroTF_JVmeasurement(JVMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1680,17 +1629,6 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'jv_curve/:/voltage',
-                'y': 'jv_curve/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     multijunction_position = Quantity(
@@ -1817,9 +1755,10 @@ class peroTF_JVmeasurement(JVMeasurement, EntryData):
             self.jv_curve = forward_curves + list(self.jv_curve)
 
         super().normalize(archive, logger)
+        self.figures = jv_figures(self.jv_curve)
 
 
-class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
+class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1844,6 +1783,10 @@ class peroTF_TFL_GammaBox_EQEmeasurement(EQEMeasurement, EntryData):
         ),
     )
 
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        self.figures = eqe_figures(self.eqe_data)
+
 
 class peroTF_PLImaging(PLImaging, EntryData):
     m_def = Section(
@@ -1863,7 +1806,7 @@ class peroTF_PLImaging(PLImaging, EntryData):
     )
 
 
-class KIT_XRD_XY_Simulated(XRD, EntryData):
+class KIT_XRD_XY_Simulated(XRD, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1883,22 +1826,15 @@ class KIT_XRD_XY_Simulated(XRD, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples', 'solution']),
         ),
-        a_plot=[
-            {
-                'x': ['data/angle'],
-                'y': ['data/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     cif_string = Quantity(type=str)
 
+    # %%####################################### Generic Entries
 
-# %%####################################### Generic Entries
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        self.figures = xrd_figures(self.data)
 
 
 class peroTF_Process(BaseProcess, EntryData):
