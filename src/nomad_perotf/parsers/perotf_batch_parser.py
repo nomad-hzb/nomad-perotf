@@ -77,6 +77,26 @@ from nomad_perotf.schema_packages.perotf_package import (
 )
 
 
+def drop_text_in_unit_columns(df, logger):
+    """
+    Columns with a unit ('... [s]') must hold numbers. Text there (e.g. 'RT') would
+    abort the whole upload in get_value, so it is dropped with a warning instead.
+    [1/0] columns are left alone, they also accept true/yes/x.
+    """
+    df = df.copy()
+    for group, label in df.columns:
+        if '[' not in str(label) or '[1/0]' in str(label):
+            continue
+        column = df[(group, label)]
+        numbers = pd.to_numeric(column, errors='coerce')
+        for value in column[numbers.isna() & column.notna()].unique():
+            logger.warning(
+                f"{group}, '{label}': {value!r} is not a number and is not stored."
+            )
+        df[(group, label)] = numbers
+    return df
+
+
 class RawHySprintExperiment(EntryData):
     processed_archive = Quantity(type=Entity, shape=['*'])
 
@@ -112,6 +132,7 @@ class PeroTFExperimentParser(MatchingParser):
             df[('Experiment Info', 'Date')] = df[('Experiment Info', 'Date')].map(
                 lambda d: str(int(d)) if isinstance(d, float) and d.is_integer() else d
             )
+        df = drop_text_in_unit_columns(df, logger)
         sample_ids = df['Experiment Info']['Nomad ID'].dropna().to_list()
         batch_id = '_'.join(sample_ids[0].split('_')[:-1])
         archives = [map_batch(sample_ids, batch_id, upload_id, peroTF_Batch)]
