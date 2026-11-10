@@ -350,7 +350,7 @@ class EQEAnalyzer:
                 h_Js**3 * c**2 * (np.exp(x / VT) - 1)
             )
             el = phi_BB * y
-            j0rad = np.trapz(el, x)
+            j0rad = integrate.trapezoid(el, x)
             j0rad = j0rad * q
         except ValueError:
             raise ValueError("""Failed to estimate a reasonable Urbach Energy.""")
