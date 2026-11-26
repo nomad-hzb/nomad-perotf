@@ -3,7 +3,13 @@ import datetime
 import os
 
 import numpy as np
-from baseclasses import BaseMeasurement, BaseProcess, Batch, LayerDeposition
+from baseclasses import (
+    BaseMeasurement,
+    BaseProcess,
+    Batch,
+    LayerDeposition,
+    PubChemPureSubstanceSectionCustom,
+)
 from baseclasses.characterizations import XRD
 from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin,
@@ -148,6 +154,22 @@ class peroTF_SpinCoating_Recipe(SpinCoatingRecipe, EntryData):
 
 class peroTF_Chemical(Chemical, EntryData):
     m_def = Section(a_eln=dict(hide=['lab_id', 'users']))
+
+
+class peroTF_SubstanceWithID(PubChemPureSubstanceSectionCustom):
+    """
+    A substance of a process step with the ID it has in the inventory system.
+    Solvents, solutes and additives of solutions keep that ID in
+    SolutionChemical.chemical_id of baseclasses; this section holds it for every
+    other substance (evaporation sources, precursors, targets, ...), under the
+    same name.
+    """
+
+    chemical_id = Quantity(
+        type=str,
+        description='ID of the chemical in the inventory system.',
+        a_eln=dict(component='StringEditQuantity'),
+    )
 
 
 # class peroTF_Powder(Powder, EntryData):
