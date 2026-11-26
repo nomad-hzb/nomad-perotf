@@ -2,14 +2,19 @@ import datetime
 import os
 
 import nomad
+import openpyxl
 import pandas as pd
 import pytest
 from nomad.client import normalize_all, parse
 
-from nomad_perotf.parsers.perotf_batch_parser import drop_text_in_unit_columns
+from nomad_perotf.parsers.perotf_batch_parser import (
+    drop_text_in_unit_columns,
+    read_experiment_excel,
+)
 from nomad_perotf.schema_packages.perotf_package import (
     peroTF_CR_SolSimBox_JVmeasurement,
     peroTF_CR_SolSimBox_MPPTracking,
+    peroTF_SubstanceWithID,
     peroTF_TFL_GammaBox_JVmeasurement,
 )
 
@@ -313,3 +318,132 @@ def test_text_in_unit_columns_is_dropped():
     ]
     assert len(warnings) == 1
     assert "'RT'" in warnings[0]
+
+
+def chemical_ids(section):
+    """
+    (name, chemical ID) of every substance in an entry's data as the API returns it.
+    A SolutionChemical has the name in chemical_2, a peroTF_SubstanceWithID in name.
+    """
+    if isinstance(section, list):
+        for item in section:
+            yield from chemical_ids(item)
+    elif isinstance(section, dict):
+        if 'chemical_id' in section:
+            yield section.get('chemical_2', section).get('name'), section['chemical_id']
+        for value in section.values():
+            yield from chemical_ids(value)
+
+
+def test_experiment_file_chemical_ids(monkeypatch):
+    """Every '... chemical ID' column is stored with its substance."""
+    file_name = os.path.join('tests', 'data', 'parsertest_chemical_ids.xlsx')
+    excel = pd.read_excel(file_name, header=[0, 1])
+
+    set_monkey_patch(monkeypatch)
+    try:
+        parse(file_name)
+        entries = {
+            file: parse(os.path.join('tests', 'data', file))[0].data
+            for file in os.listdir(os.path.join('tests', 'data'))
+            if file.endswith('.archive.json')
+        }
+    finally:
+        delete_json()
+
+    def entry(group):
+        prefix = group.split(':')[0] + '_0_'
+        (data,) = [data for file, data in entries.items() if file.startswith(prefix)]
+        return data
+
+    # group -> name column and ID column of each substance with an ID
+    expected = {
+        '1: Cleaning O2-Plasma': [
+            ('Solvent 1', 'Solvent 1 chemical ID'),
+            ('Solvent 2', 'Solvent 2 chemical ID'),
+        ],
+        '2: Cleaning UV-Ozone': [('Solvent 1', 'Solvent 1 chemical ID')],
+        '3: Spin Coating': [
+            ('Solvent 1 name', 'Solvent 1 chemical ID'),
+            ('Solvent 2 name', 'Solvent 2 chemical ID'),
+            ('Solute 1 type', 'Solute 1 chemical ID'),
+            ('Solute 2 type', 'Solute 2 chemical ID'),
+            ('Anti solvent name', 'Anti solvent chemical ID'),
+        ],
+        '4: Spin Coating': [('Solvent 1 name', 'Solvent 1 chemical ID')],
+        '5: Spin Coating': [],
+        '6: Dip Coating': [
+            ('Solvent 1 name', 'Solvent 1 chemical ID'),
+            ('Solute 1 type', 'Solute 1 chemical ID'),
+        ],
+        '7: Slot Die Coating': [
+            ('Solvent 1 name', 'Solvent 1 chemical ID'),
+            ('Solute 1 type', 'Solute 1 chemical ID'),
+        ],
+        '8: Inkjet Printing': [
+            ('Solvent 1 name', 'Solvent 1 chemical ID'),
+            ('Solute 1 type', 'Solute 1 chemical ID'),
+        ],
+        '10: Evaporation': [('Material name', 'Material chemical ID')],
+        '11: Evaporation': [('Material name', 'Material chemical ID')],
+        '12: Co-Evaporation': [
+            (f'Material name {n}', f'Material chemical ID {n}') for n in range(1, 6)
+        ],
+        '13: Seq-Evaporation': [
+            (f'Material name {n}', f'Material chemical ID {n}') for n in range(1, 4)
+        ],
+        '14: Close Space Sublimation': [
+            ('Source material name 1', 'Source material chemical ID 1'),
+            ('Source material name 2', 'Source material chemical ID 2'),
+        ],
+        '15: Close Space Sublimation': [
+            ('Source material name 1', 'Source material chemical ID 1')
+        ],
+        '16: Sputtering': [('Material name', 'Material chemical ID')],
+        '17: ALD': [
+            ('Precursor 1', 'Precursor 1 chemical ID'),
+            ('Precursor 2 (Oxidizer/Reducer)', 'Precursor 2 chemical ID'),
+        ],
+    }
+    for group, columns in expected.items():
+        assert set(chemical_ids(entry(group).m_to_dict())) == {
+            (excel[group][name].iloc[0], str(excel[group][chemical_id].iloc[0]))
+            for name, chemical_id in columns
+        }, group
+
+    # a numeric ID is stored as text
+    assert entry('1: Cleaning O2-Plasma').cleaning[1].solvent_2.chemical_id == '4711'
+    # the section type survives the round trip through the .archive.json
+    assert isinstance(
+        entry('16: Sputtering').processes[0].target_2, peroTF_SubstanceWithID
+    )
+    # substances without an ID keep their baseclasses section
+    assert not isinstance(
+        entry('2: Cleaning UV-Ozone').cleaning[1].solvent_2, peroTF_SubstanceWithID
+    )
+
+
+def test_columns_without_unit_are_read_as_text(tmp_path):
+    """A column without a unit is text, as typed: pandas would read a column of IDs like
+    000123 as the number 123, and 4711 or 20261103 as 4711.0 or 20261103.0 once a cell
+    of the column is empty. A column with a unit stays numbers."""
+    file_name = tmp_path / 'columns.xlsx'
+    cleaning, spin_coating = '1: Cleaning UV-Ozone', '2: Spin Coating'
+    chemical_id, volume = 'Solvent 1 chemical ID', 'Solvent 1 volume [uL]'
+    workbook = openpyxl.Workbook()
+    for row in [
+        ['Experiment Info', 'Experiment Info', cleaning, spin_coating, spin_coating],
+        ['Nomad ID', 'Date', chemical_id, chemical_id, volume],
+        ['KIT_A_1', 20261103, '000123', 4711, 100],
+        ['KIT_A_2', None, '000123', None, None],
+    ]:
+        workbook.active.append(row)
+    workbook.save(file_name)
+
+    df = read_experiment_excel(file_name)
+
+    assert list(df[(cleaning, chemical_id)]) == ['000123', '000123']
+    assert df[(spin_coating, chemical_id)][0] == '4711'
+    assert pd.isna(df[(spin_coating, chemical_id)][1])
+    assert df[('Experiment Info', 'Date')][0] == '20261103'
+    assert df[(spin_coating, volume)][0] == 100

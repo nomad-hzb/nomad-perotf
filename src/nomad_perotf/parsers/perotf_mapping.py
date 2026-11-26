@@ -2,6 +2,10 @@
 Wrappers around baseclasses.helper.solar_cell_batch_mapping that read every column
 Excel_creator writes. baseclasses is shared with other groups and stays unchanged;
 whatever its map_* functions miss is added here.
+
+Inventory IDs: every substance can have a '... chemical ID' column next to the
+column with its name. baseclasses reads them for solutions ('Solvent N chemical ID',
+'Solute N chemical ID', 'Additive N chemical ID'); add_chemical_id handles the rest.
 """
 
 import re
@@ -17,6 +21,15 @@ from baseclasses.helper.solar_cell_batch_mapping import (
     map_vacuum_quenching,
 )
 from baseclasses.helper.solar_cell_batch_mapping import (
+    map_atomic_layer_deposition as bc_map_atomic_layer_deposition,
+)
+from baseclasses.helper.solar_cell_batch_mapping import (
+    map_cleaning as bc_map_cleaning,
+)
+from baseclasses.helper.solar_cell_batch_mapping import (
+    map_close_space_sublimation as bc_map_close_space_sublimation,
+)
+from baseclasses.helper.solar_cell_batch_mapping import (
     map_evaporation as bc_map_evaporation,
 )
 from baseclasses.helper.solar_cell_batch_mapping import (
@@ -25,6 +38,9 @@ from baseclasses.helper.solar_cell_batch_mapping import (
 from baseclasses.helper.solar_cell_batch_mapping import (
     map_spin_coating as bc_map_spin_coating,
 )
+from baseclasses.helper.solar_cell_batch_mapping import (
+    map_sputtering as bc_map_sputtering,
+)
 from baseclasses.vapour_based_deposition.evaporation import (
     InorganicEvaporation,
     OrganicEvaporation,
@@ -32,7 +48,25 @@ from baseclasses.vapour_based_deposition.evaporation import (
 )
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 
-from nomad_perotf.schema_packages.perotf_package import peroTF_LaminationSettings
+from nomad_perotf.schema_packages.perotf_package import (
+    peroTF_LaminationSettings,
+    peroTF_SubstanceWithID,
+)
+
+
+def add_chemical_id(section, sub_section, data, key):
+    """
+    Stores the inventory ID of column key with the substance in
+    section.sub_section, which becomes a peroTF_SubstanceWithID for that. Nothing
+    changes when the column is empty or there is no substance.
+    """
+    chemical_id = get_value(data, key, None, False)
+    substance = getattr(section, sub_section, None)
+    if chemical_id is None or substance is None:
+        return
+    substance = peroTF_SubstanceWithID.m_from_dict(substance.m_to_dict())
+    substance.chemical_id = chemical_id
+    setattr(section, sub_section, substance)
 
 
 def get_flag(data, key):
@@ -100,6 +134,7 @@ def map_evaporation_source(data, mat, evaporation):
     evaporation.chemical_2 = PubChemPureSubstanceSectionCustom(
         name=get_value(data, f'Material name{mat}', None, False), load_data=False
     )
+    add_chemical_id(evaporation, 'chemical_2', data, f'Material chemical ID{mat}')
     return evaporation
 
 
@@ -214,6 +249,63 @@ def map_lamination(i, j, lab_ids, data, upload_id, lamination_class):  # noqa: P
 def map_spin_coating(i, j, lab_ids, data, upload_id, sc_class):  # noqa: PLR0917
     file_name, archive = bc_map_spin_coating(i, j, lab_ids, data, upload_id, sc_class)
     archive.spin_delay = get_value(data, 'Spin Delay [s]', None)
+    add_chemical_id(
+        archive.quenching, 'anti_solvent_2', data, 'Anti solvent chemical ID'
+    )
+    return file_name, archive
+
+
+def map_cleaning(i, j, lab_ids, data, upload_id, cleaning_class):  # noqa: PLR0917
+    file_name, archive = bc_map_cleaning(i, j, lab_ids, data, upload_id, cleaning_class)
+    # baseclasses makes one entry per non-empty 'Solvent N', in this order
+    numbers = [n for n in range(10) if get_value(data, f'Solvent {n}', None, False)]
+    for n, cleaning in zip(numbers, archive.cleaning):
+        add_chemical_id(cleaning, 'solvent_2', data, f'Solvent {n} chemical ID')
+    return file_name, archive
+
+
+def map_close_space_sublimation(i, j, lab_ids, data, upload_id, css_class):  # noqa: PLR0917
+    file_name, archive = bc_map_close_space_sublimation(
+        i, j, lab_ids, data, upload_id, css_class
+    )
+    process = archive.process
+    # baseclasses makes one source material per non-empty name, in this order
+    suffixes = [
+        mat
+        for mat in ['', ' 1', ' 2', ' 3', ' 4']
+        if get_value(
+            data, [f'Source material name{mat}', f'Source material{mat}'], None, False
+        )
+    ]
+    for mat, source in zip(suffixes, process.source_material_mixture):
+        add_chemical_id(
+            source, 'source_material', data, f'Source material chemical ID{mat}'
+        )
+    if process.source_material_mixture:
+        # baseclasses also keeps the first source material in chemical_2
+        process.chemical_2 = process.source_material_mixture[0].source_material.m_copy(
+            deep=True
+        )
+    return file_name, archive
+
+
+def map_sputtering(i, j, lab_ids, data, upload_id, sputter_class):  # noqa: PLR0917
+    file_name, archive = bc_map_sputtering(
+        i, j, lab_ids, data, upload_id, sputter_class
+    )
+    add_chemical_id(archive.processes[0], 'target_2', data, 'Material chemical ID')
+    return file_name, archive
+
+
+def map_atomic_layer_deposition(i, j, lab_ids, data, upload_id, ald_class):  # noqa: PLR0917
+    file_name, archive = bc_map_atomic_layer_deposition(
+        i, j, lab_ids, data, upload_id, ald_class
+    )
+    properties = archive.properties
+    add_chemical_id(properties.material, 'material', data, 'Precursor 1 chemical ID')
+    add_chemical_id(
+        properties.oxidizer_reducer, 'material', data, 'Precursor 2 chemical ID'
+    )
     return file_name, archive
 
 

@@ -28,15 +28,11 @@ from baseclasses.helper.solar_cell_batch_mapping import (
     get_reference,
     get_value,
     map_annealing_class,
-    map_atomic_layer_deposition,
     map_basic_sample,
     map_batch,
-    map_cleaning,
-    map_close_space_sublimation,
     map_dip_coating,
     map_generic,
     map_sdc,
-    map_sputtering,
     map_substrate,
 )
 from baseclasses.helper.utilities import create_archive
@@ -53,10 +49,14 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_perotf.parsers.perotf_mapping import (
+    map_atomic_layer_deposition,
+    map_cleaning,
+    map_close_space_sublimation,
     map_evaporation,
     map_inkjet_printing,
     map_lamination,
     map_spin_coating,
+    map_sputtering,
 )
 from nomad_perotf.schema_packages.perotf_package import (
     peroTF_ALD,
@@ -77,6 +77,11 @@ from nomad_perotf.schema_packages.perotf_package import (
 )
 
 
+def has_unit(label):
+    """A column with a unit ('Thickness [nm]') holds numbers, every other one text."""
+    return '[' in str(label)
+
+
 def drop_text_in_unit_columns(df, logger):
     """
     Columns with a unit ('... [s]') must hold numbers. Text there (e.g. 'RT') would
@@ -85,7 +90,7 @@ def drop_text_in_unit_columns(df, logger):
     """
     df = df.copy()
     for group, label in df.columns:
-        if '[' not in str(label) or '[1/0]' in str(label):
+        if not has_unit(label) or '[1/0]' in str(label):
             continue
         column = df[(group, label)]
         numbers = pd.to_numeric(column, errors='coerce')
@@ -95,6 +100,18 @@ def drop_text_in_unit_columns(df, logger):
             )
         df[(group, label)] = numbers
     return df
+
+
+def read_experiment_excel(mainfile):
+    """
+    The experiment sheet, with every column without a unit read as the text in the
+    cell. Otherwise pandas guesses: an inventory ID 000123 becomes the number 123, and
+    4711 or a date 20261103 get a '.0' once a cell of the column is empty. get_value
+    still turns such text into a number where the schema wants one.
+    """
+    columns = pd.read_excel(mainfile, header=[0, 1], nrows=0).columns
+    as_text = {i: str for i, (_, label) in enumerate(columns) if not has_unit(label)}
+    return pd.read_excel(mainfile, header=[0, 1], converters=as_text)
 
 
 class RawHySprintExperiment(EntryData):
@@ -125,13 +142,8 @@ class PeroTFExperimentParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         upload_id = archive.metadata.upload_id
         # xls = pd.ExcelFile(mainfile)
-        df = pd.read_excel(mainfile, header=[0, 1])
+        df = read_experiment_excel(mainfile)
         df = df[~df['Experiment Info']['Nomad ID'].isna()]
-        if ('Experiment Info', 'Date') in df.columns:
-            # pandas reads 20261103 as 20261103.0 once a cell of the column is empty
-            df[('Experiment Info', 'Date')] = df[('Experiment Info', 'Date')].map(
-                lambda d: str(int(d)) if isinstance(d, float) and d.is_integer() else d
-            )
         df = drop_text_in_unit_columns(df, logger)
         sample_ids = df['Experiment Info']['Nomad ID'].dropna().to_list()
         batch_id = '_'.join(sample_ids[0].split('_')[:-1])
